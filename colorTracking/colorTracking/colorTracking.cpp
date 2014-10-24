@@ -28,21 +28,21 @@ int main( int argc, char** argv )
 {
     VideoCapture cap(0); //capture the video from webcam
 
-        if ( !cap.isOpened() )  // if not success, exit program
-        {
-            cout << "Cannot open the web cam" << endl;
-            return -1;
-        }
+    if ( !cap.isOpened() )  // if not success, exit program
+    {
+        cout << "Cannot open the web cam" << endl;
+        return -1;
+    }
 
-        namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
+    namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 
     int iLowH = 0;
-    int iHighH = 10;
+    int iHighH = 15;
 
-    int iLowS = 034;
+    int iLowS = 172;
     int iHighS = 255;
 
-    int iLowV = 137;
+    int iLowV = 112;
     int iHighV = 255;
 
     //Create trackbars in "Control" window
@@ -66,18 +66,18 @@ int main( int argc, char** argv )
     Mat imgLines = Mat::zeros( imgTmp.size(), CV_8UC3 );;
 
 
-        while (true)
+    while (true)
+    {
+        Mat imgOriginal;
+        bool bSuccess = cap.read(imgOriginal); // read a new frame from video
+
+        if (!bSuccess) //if not success, break loop
         {
-            Mat imgOriginal;
-            bool bSuccess = cap.read(imgOriginal); // read a new frame from video
+            cout << "Cannot read a frame from video stream" << endl;
+            break;
+        }
 
-            if (!bSuccess) //if not success, break loop
-            {
-                    cout << "Cannot read a frame from video stream" << endl;
-                    break;
-            }
-
-            Mat imgHSV;
+        Mat imgHSV;
         cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
         Mat imgThresholded;
 
@@ -106,14 +106,8 @@ int main( int argc, char** argv )
             int posX = dM10 / dArea;
             int posY = dM01 / dArea;
 
-            if (iLastX >= 0 && iLastY >= 0 && posX >= 0 && posY >= 0)
-            {
-                    //Draw a red line from the previous point to the current point
-                    line(imgLines, Point(posX, posY), Point(iLastX, iLastY), Scalar(0,0,255), 2);
-            }
-
-            iLastX = posX;
-            iLastY = posY;
+            cout << posX << "\n";
+            cout << posY << "\n\n";
         }
 
         imshow("Thresholded Image", imgThresholded); //show the thresholded image
