@@ -106,6 +106,9 @@ int main( int argc, char** argv )
             int posX = dM10 / dArea;
             int posY = dM01 / dArea;
 
+            // Draw a circle
+            circle( imgOriginal, Point(posX,posY), 16.0, Scalar( 255, 0, 0 ), 3, 8 );
+
             cout << posX << "\n";
             cout << posY << "\n\n";
         }
