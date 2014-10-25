@@ -158,6 +158,16 @@ int main( int argc, char** argv )
         vector<Vec4i> lines;
         HoughLinesP(imgGray, lines, 1, CV_PI/180, 70, 30, 10);
 
+        // Expand the lines
+        for (int i = 0; i < lines.size(); i++)
+        {
+            Vec4i v = lines[i];
+            lines[i][0] = 0;
+            lines[i][1] = ((float)v[1] - v[3]) / (v[0] - v[2]) * -v[0] + v[1];
+            lines[i][2] = imgOriginal.cols;
+            lines[i][3] = ((float)v[1] - v[3]) / (v[0] - v[2]) * (imgOriginal.cols - v[2]) + v[3];
+        }
+
         // Draw lines
         for (int i = 0; i < lines.size(); i++)
         {
