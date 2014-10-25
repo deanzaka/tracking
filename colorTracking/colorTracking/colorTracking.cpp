@@ -76,8 +76,23 @@ int main( int argc, char** argv )
 
         Mat imgHSV;
         cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
-        Mat imgThresholded;
 
+        Mat imgGray;
+        cvtColor(imgOriginal, imgGray, COLOR_BGR2GRAY); //Covert the captured frame from BGR to HSV
+        blur(imgGray,imgGray,Size(4, 4));
+        Canny(imgGray,imgGray,100,100,3); //Get edge map
+        vector<Vec4i> lines;
+        HoughLinesP(imgGray, lines, 1, CV_PI/180, 70, 30, 10);
+
+        // Draw lines
+        for (int i = 0; i < lines.size(); i++)
+        {
+        Vec4i v = lines[i];
+        line(imgLines, Point(v[0], v[1]), Point(v[2], v[3]), CV_RGB(0,255,0));
+        }
+
+
+        Mat imgThresholded;
         inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
 
         //morphological opening (removes small objects from the foreground)
@@ -104,14 +119,14 @@ int main( int argc, char** argv )
             int posY = dM01 / dArea;
 
             // Draw a circle
-            circle( imgOriginal, Point(posX,posY), 16.0, Scalar( 255, 0, 0 ), 3, 8 );
+            circle( imgOriginal, Point(posX,posY), 16.0, Scalar( 0, 0, 255), 3, 8 );
 
             cout << posX << "\t";
             cout << posY << "\n\n";
         }
 
-        imshow("Thresholded Image", imgThresholded); //show the thresholded image
-
+        //imshow("Thresholded Image", imgThresholded); //show the thresholded image
+        imshow("Edge Map", imgGray); //show the edge map
         imgOriginal = imgOriginal + imgLines;
         imshow("Original", imgOriginal); //show the original image
 
