@@ -26,7 +26,7 @@ using namespace std;
 
 int main( int argc, char** argv )
 {
-    VideoCapture cap(0); //capture the video from webcam
+    VideoCapture cap(1); //capture the video from webcam
 
     if ( !cap.isOpened() )  // if not success, exit program
     {
@@ -37,12 +37,12 @@ int main( int argc, char** argv )
     namedWindow("Control", CV_WINDOW_AUTOSIZE); //create a window called "Control"
 
     int iLowH = 0;
-    int iHighH = 15;
+    int iHighH = 10;
 
-    int iLowS = 172;
+    int iLowS = 135;
     int iHighS = 255;
 
-    int iLowV = 112;
+    int iLowV = 50;
     int iHighV = 255;
 
     //Create trackbars in "Control" window
@@ -54,9 +54,6 @@ int main( int argc, char** argv )
 
     createTrackbar("LowV", "Control", &iLowV, 255);//Value (0 - 255)
     createTrackbar("HighV", "Control", &iHighV, 255);
-
-    int iLastX = -1;
-    int iLastY = -1;
 
     //Capture a temporary image from the camera
     Mat imgTmp;
@@ -109,7 +106,7 @@ int main( int argc, char** argv )
             // Draw a circle
             circle( imgOriginal, Point(posX,posY), 16.0, Scalar( 255, 0, 0 ), 3, 8 );
 
-            cout << posX << "\n";
+            cout << posX << "\t";
             cout << posY << "\n\n";
         }
 
