@@ -99,8 +99,8 @@ int main( int argc, char** argv )
     //=============== FIELD CONTROL ==============================================//
     namedWindow("Field", CV_WINDOW_AUTOSIZE); //create a window called "Field"
 
-    int fLowH = 40;
-    int fHighH = 113;
+    int fLowH = 0;
+    int fHighH = 100;
 
     int fLowS = 180;
     int fHighS = 255;
@@ -203,19 +203,19 @@ int main( int argc, char** argv )
         c = lines.size();
         cout << "Lines: " << c << "\n";
 
-        // Expand the lines
-        /*for (int i = 0; i < lines.size(); i++)
+        if(c >= 4)
         {
-            Vec4i v = lines[i];
-            lines[i][0] = 0;
-            lines[i][1] = ((float)v[1] - v[3]) / (v[0] - v[2]) * -v[0] + v[1];
-            lines[i][2] = imgOriginal.cols;
-            lines[i][3] = ((float)v[1] - v[3]) / (v[0] - v[2]) * (imgOriginal.cols - v[2]) + v[3];
-        }*/
+            // Expand the lines
+            for (int i = 0; i < lines.size(); i++)
+            {
+                Vec4i v = lines[i];
+                lines[i][0] = 0;
+                lines[i][1] = ((float)v[1] - v[3]) / (v[0] - v[2]) * -v[0] + v[1];
+                lines[i][2] = imgOriginal.cols;
+                lines[i][3] = ((float)v[1] - v[3]) / (v[0] - v[2]) * (imgOriginal.cols - v[2]) + v[3];
+            }
 
-        // Draw lines
-        if(c == 4)
-        {
+            // Draw lines
             for (int i = 0; i < lines.size(); i++)
             {
                 Vec4i v = lines[i];
@@ -236,29 +236,40 @@ int main( int argc, char** argv )
             approxPolyDP(Mat(corners), approx, arcLength(Mat(corners), true) * 0.02, true);
             if (approx.size() == 4)
             {
+                cout << "\nLines: " << c << "\n";
+                cout << "Corners: " << corners.size() << "\n";
                 cout << "The object is quadrilateral! \n\n";
 
                 // Get mass center
                 for (int i = 0; i < corners.size(); i++)
                 center += corners[i];
                 center *= (1. / corners.size());
-                sortCorners(corners, center);
-                /*
+                //sortCorners(corners, center);
+
                 // Draw corner points
-                circle(imgOriginal, corners[0], 3, CV_RGB(255,0,0), 2);
-                circle(imgOriginal, corners[1], 3, CV_RGB(0,255,0), 2);
-                circle(imgOriginal, corners[2], 3, CV_RGB(0,0,255), 2);
-                circle(imgOriginal, corners[3], 3, CV_RGB(255,255,255), 2);
+                for(int i = 0; i < corners.size(); i++)
+                {
+                    string out;          // string which will contain the result
+                    ostringstream convert;   // stream used for the conversion
+                    convert << i;      // insert the textual representation of 'Number' in the characters in the stream
+                    out = convert.str(); // set 'out' to the contents of the stream
+                    circle(imgOriginal, corners[i], 3, Scalar(255,0,0), 3, 8);
+                    putText(imgOriginal,out,corners[i],FONT_HERSHEY_SIMPLEX,1,Scalar(255,0,0));
+                }
+
                 // Draw mass center
-                circle(imgOriginal, center, 3, CV_RGB(255,255,0), 2);
-                */
+                //circle(imgOriginal, center, 3, CV_RGB(255,255,0), 2);
+
+                imshow("Original", imgOriginal); //show the original image;
+                usleep(3000000);
             }
         }
         //==================== generate lines ============================================================================//
 
         //imshow("Edge Map", imgGray); //show the edge map
         //imgOriginal = imgOriginal + imgLines;
-        imshow("Original", imgOriginal); //show the original image
+        //imshow("Original", imgOriginal); //show the original image
+
 
             if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
             {
