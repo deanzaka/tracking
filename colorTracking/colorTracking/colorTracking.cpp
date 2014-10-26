@@ -169,6 +169,11 @@ int main( int argc, char** argv )
         dilate( imgField, imgField, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
         erode(imgField, imgField, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
+        //imshow("Field Image", imgField); //show the thresholded image
+        //==================== field detection ===========================================================================//
+
+
+        //==================== GENERATE LINES ============================================================================//
         Mat imgGray;
         blur(imgField,imgGray,Size(3, 3));
         Canny(imgGray,imgGray,100,100,3); //Get edge map
@@ -191,8 +196,25 @@ int main( int argc, char** argv )
             Vec4i v = lines[i];
             line(imgOriginal, Point(v[0], v[1]), Point(v[2], v[3]), CV_RGB(0,255,0));
         }
-        //imshow("Field Image", imgField); //show the thresholded image
-        //==================== field detection ===========================================================================//
+
+        vector<Point2f> corners;
+        for (int i = 0; i < lines.size(); i++)
+        {
+            for (int j = i+1; j < lines.size(); j++)
+            {
+                Point2f pt = computeIntersect(lines[i], lines[j]);
+                if (pt.x >= 0 && pt.y >= 0) corners.push_back(pt);
+            }
+        }
+
+        vector<Point2f> approx;
+        approxPolyDP(Mat(corners), approx, arcLength(Mat(corners), true) * 0.02, true);
+        if (approx.size() != 4)
+        {
+            cout << "The object is not quadrilateral!" << endl;
+            return -1;
+        }
+        //==================== generate lines ============================================================================//
 
         //imshow("Edge Map", imgGray); //show the edge map
         //imgOriginal = imgOriginal + imgLines;
