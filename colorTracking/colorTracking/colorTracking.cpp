@@ -24,6 +24,23 @@
 using namespace cv;
 using namespace std;
 
+Point2f center(0,0);
+
+Point2f computeIntersect(Vec4i a, Vec4i b)
+{
+    int x1 = a[0], y1 = a[1], x2 = a[2], y2 = a[3], x3 = b[0], y3 = b[1], x4 = b[2], y4 = b[3];
+    float denom;
+    if (float d = ((float)(x1 - x2) * (y3 - y4)) - ((y1 - y2) * (x3 - x4)))
+    {
+        Point2f pt;
+        pt.x = ((x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4)) / d;
+        pt.y = ((x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4)) / d;
+        return pt;
+    }
+    else
+    return Point2f(-1, -1);
+}
+
 int main( int argc, char** argv )
 {
     VideoCapture cap(1); //capture the video from webcam
