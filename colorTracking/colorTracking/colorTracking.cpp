@@ -41,6 +41,27 @@ Point2f computeIntersect(Vec4i a, Vec4i b)
     return Point2f(-1, -1);
 }
 
+void sortCorners(vector<Point2f>& corners, Point2f center)
+{
+    vector<Point2f> top, bot;
+    for (int i = 0; i < corners.size(); i++)
+    {
+        if (corners[i].y < center.y)
+            top.push_back(corners[i]);
+        else
+        bot.push_back(corners[i]);
+    }
+    Point2f tl = top[0].x > top[1].x ? top[1] : top[0];
+    Point2f tr = top[0].x > top[1].x ? top[0] : top[1];
+    Point2f bl = bot[0].x > bot[1].x ? bot[1] : bot[0];
+    Point2f br = bot[0].x > bot[1].x ? bot[0] : bot[1];
+    corners.clear();
+    corners.push_back(tl);
+    corners.push_back(tr);
+    corners.push_back(br);
+    corners.push_back(bl);
+}
+
 int main( int argc, char** argv )
 {
     VideoCapture cap(1); //capture the video from webcam
@@ -78,14 +99,14 @@ int main( int argc, char** argv )
     //=============== FIELD CONTROL ==============================================//
     namedWindow("Field", CV_WINDOW_AUTOSIZE); //create a window called "Field"
 
-    int fLowH = 65;
-    int fHighH = 100;
+    int fLowH = 40;
+    int fHighH = 113;
 
-    int fLowS = 90;
-    int fHighS = 220;
+    int fLowS = 180;
+    int fHighS = 255;
 
-    int fLowV = 60;
-    int fHighV = 130;
+    int fLowV = 120;
+    int fHighV = 255;
 
     //Create trackbars in "Field" window
     createTrackbar("LowH", "Field", &fLowH, 179); //Hue (0 - 179)
@@ -105,7 +126,7 @@ int main( int argc, char** argv )
     //Create a black image with the size as the camera output
     Mat imgLines = Mat::zeros( imgTmp.size(), CV_8UC3 );;
 
-
+    int c = 0;
     while (true)
     {
         Mat imgOriginal;
@@ -169,7 +190,7 @@ int main( int argc, char** argv )
         dilate( imgField, imgField, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
         erode(imgField, imgField, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
 
-        //imshow("Field Image", imgField); //show the thresholded image
+        imshow("Field Image", imgField); //show the thresholded image
         //==================== field detection ===========================================================================//
 
 
@@ -178,41 +199,60 @@ int main( int argc, char** argv )
         blur(imgField,imgGray,Size(3, 3));
         Canny(imgGray,imgGray,100,100,3); //Get edge map
         vector<Vec4i> lines;
-        HoughLinesP(imgGray, lines, 1, CV_PI/180, 70, 30, 10);
+        HoughLinesP(imgGray, lines, 1, CV_PI/180, 30, 30, 10);
+        c = lines.size();
+        cout << "Lines: " << c << "\n";
 
         // Expand the lines
-        for (int i = 0; i < lines.size(); i++)
+        /*for (int i = 0; i < lines.size(); i++)
         {
             Vec4i v = lines[i];
             lines[i][0] = 0;
             lines[i][1] = ((float)v[1] - v[3]) / (v[0] - v[2]) * -v[0] + v[1];
             lines[i][2] = imgOriginal.cols;
             lines[i][3] = ((float)v[1] - v[3]) / (v[0] - v[2]) * (imgOriginal.cols - v[2]) + v[3];
-        }
+        }*/
 
         // Draw lines
-        for (int i = 0; i < lines.size(); i++)
+        if(c == 4)
         {
-            Vec4i v = lines[i];
-            line(imgOriginal, Point(v[0], v[1]), Point(v[2], v[3]), CV_RGB(0,255,0));
-        }
-
-        vector<Point2f> corners;
-        for (int i = 0; i < lines.size(); i++)
-        {
-            for (int j = i+1; j < lines.size(); j++)
+            for (int i = 0; i < lines.size(); i++)
             {
-                Point2f pt = computeIntersect(lines[i], lines[j]);
-                if (pt.x >= 0 && pt.y >= 0) corners.push_back(pt);
+                Vec4i v = lines[i];
+                line(imgOriginal, Point(v[0], v[1]), Point(v[2], v[3]), CV_RGB(0,255,0));
             }
-        }
 
-        vector<Point2f> approx;
-        approxPolyDP(Mat(corners), approx, arcLength(Mat(corners), true) * 0.02, true);
-        if (approx.size() != 4)
-        {
-            cout << "The object is not quadrilateral!" << endl;
-            return -1;
+            vector<Point2f> corners;
+            for (int i = 0; i < lines.size(); i++)
+            {
+                for (int j = i+1; j < lines.size(); j++)
+                {
+                    Point2f pt = computeIntersect(lines[i], lines[j]);
+                    if (pt.x >= 0 && pt.y >= 0) corners.push_back(pt);
+                }
+            }
+
+            vector<Point2f> approx;
+            approxPolyDP(Mat(corners), approx, arcLength(Mat(corners), true) * 0.02, true);
+            if (approx.size() == 4)
+            {
+                cout << "The object is quadrilateral! \n\n";
+
+                // Get mass center
+                for (int i = 0; i < corners.size(); i++)
+                center += corners[i];
+                center *= (1. / corners.size());
+                sortCorners(corners, center);
+                /*
+                // Draw corner points
+                circle(imgOriginal, corners[0], 3, CV_RGB(255,0,0), 2);
+                circle(imgOriginal, corners[1], 3, CV_RGB(0,255,0), 2);
+                circle(imgOriginal, corners[2], 3, CV_RGB(0,0,255), 2);
+                circle(imgOriginal, corners[3], 3, CV_RGB(255,255,255), 2);
+                // Draw mass center
+                circle(imgOriginal, center, 3, CV_RGB(255,255,0), 2);
+                */
+            }
         }
         //==================== generate lines ============================================================================//
 
@@ -225,6 +265,6 @@ int main( int argc, char** argv )
             cout << "esc key is pressed by user" << endl;
                     break;
             }
-        }
+    }
     return 0;
 }
