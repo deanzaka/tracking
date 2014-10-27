@@ -99,13 +99,13 @@ int main( int argc, char** argv )
     //=============== FIELD CONTROL ==============================================//
     namedWindow("Field", CV_WINDOW_AUTOSIZE); //create a window called "Field"
 
-    int fLowH = 0;
-    int fHighH = 100;
+    int fLowH = 10;
+    int fHighH = 20;
 
-    int fLowS = 180;
+    int fLowS = 80;
     int fHighS = 255;
 
-    int fLowV = 120;
+    int fLowV = 170;
     int fHighV = 255;
 
     //Create trackbars in "Field" window
@@ -228,7 +228,7 @@ int main( int argc, char** argv )
                 for (int j = i+1; j < lines.size(); j++)
                 {
                     Point2f pt = computeIntersect(lines[i], lines[j]);
-                    if (pt.x >= 0 && pt.y >= 0) corners.push_back(pt);
+                    if ((pt.x >= 0 && pt.x <= 640) && (pt.y >= 0 && pt.y <= 480)) corners.push_back(pt);
                 }
             }
 
@@ -249,7 +249,8 @@ int main( int argc, char** argv )
                 cout << "corners[0]: " << corners[0] << "\n";
                 cout << "corners[1]: " << corners[1] << "\n";
                 cout << "corners[2]: " << corners[2] << "\n";
-                cout << "corners[3]: " << corners[3] << "\n\n";
+                cout << "corners[3]: " << corners[3] << "\n";
+                cout << "center: " << center << "\n\n";
 
                 // Draw corner points
                 for(int i = 0; i < corners.size(); i++)
@@ -261,11 +262,11 @@ int main( int argc, char** argv )
                     circle(imgOriginal, corners[i], 3, Scalar(255,0,0), 3, 8);
                     putText(imgOriginal,out,corners[i],FONT_HERSHEY_SIMPLEX,1,Scalar(255,0,0));
                 }
-
                 // Draw mass center
                 circle(imgOriginal, center, 3, CV_RGB(255,0,0), 2);
-                usleep(3000000);
+                //getchar();
                 imshow("Original", imgOriginal); //show the original image
+                getchar();
             }
         }
         //==================== generate lines ============================================================================//
