@@ -199,11 +199,11 @@ int main( int argc, char** argv )
         blur(imgField,imgGray,Size(3, 3));
         Canny(imgGray,imgGray,100,100,3); //Get edge map
         vector<Vec4i> lines;
-        HoughLinesP(imgGray, lines, 1, CV_PI/180, 30, 30, 10);
+        HoughLinesP(imgGray, lines, 1, CV_PI/180, 50, 30, 10);
         c = lines.size();
         cout << "Lines: " << c << "\n";
 
-        if(c >= 4)
+        if(c == 4)
         {
             // Expand the lines
             for (int i = 0; i < lines.size(); i++)
@@ -243,8 +243,13 @@ int main( int argc, char** argv )
                 // Get mass center
                 for (int i = 0; i < corners.size(); i++)
                 center += corners[i];
-                center *= (1. / corners.size());
+                center *= (1.0 / corners.size());
                 //sortCorners(corners, center);
+
+                cout << "corners[0]: " << corners[0] << "\n";
+                cout << "corners[1]: " << corners[1] << "\n";
+                cout << "corners[2]: " << corners[2] << "\n";
+                cout << "corners[3]: " << corners[3] << "\n\n";
 
                 // Draw corner points
                 for(int i = 0; i < corners.size(); i++)
@@ -258,17 +263,16 @@ int main( int argc, char** argv )
                 }
 
                 // Draw mass center
-                //circle(imgOriginal, center, 3, CV_RGB(255,255,0), 2);
-
-                imshow("Original", imgOriginal); //show the original image;
+                circle(imgOriginal, center, 3, CV_RGB(255,0,0), 2);
                 usleep(3000000);
+                imshow("Original", imgOriginal); //show the original image
             }
         }
         //==================== generate lines ============================================================================//
 
         //imshow("Edge Map", imgGray); //show the edge map
         //imgOriginal = imgOriginal + imgLines;
-        //imshow("Original", imgOriginal); //show the original image
+        imshow("Original", imgOriginal); //show the original image
 
 
             if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
