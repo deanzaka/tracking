@@ -127,10 +127,14 @@ int main( int argc, char** argv )
     Mat imgLines = Mat::zeros( imgTmp.size(), CV_8UC3 );;
 
     int c = 0;
+    Mat quad = Mat::zeros(500, 500, CV_8UC3);
+
     while (true)
     {
         Mat imgOriginal;
         bool bSuccess = cap.read(imgOriginal); // read a new frame from video
+        Mat imgOriginalCopy; // make copy of imgOriginal
+        cap.read(imgOriginalCopy);
 
         if (!bSuccess) //if not success, break loop
         {
@@ -140,43 +144,6 @@ int main( int argc, char** argv )
 
         Mat imgHSV;
         cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
-
-        //==================== OBJECT DETECTION ===========================================================================//
-        Mat imgThresholded;
-        inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
-
-        //morphological opening (removes small objects from the foreground)
-        erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-        dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-
-        //morphological closing (removes small holes from the foreground)
-        dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-        erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
-
-        //Calculate the moments of the thresholded image
-        Moments oMoments = moments(imgThresholded);
-
-        double dM01 = oMoments.m01;
-        double dM10 = oMoments.m10;
-        double dArea = oMoments.m00;
-        int posX, posY;
-
-        // if the area <= 10000, I consider that the there are no object in the image
-        //and it's because of the noise, the area is not zero
-        if (dArea > 10000)
-        {
-            //calculate the position of the ball
-            posX = dM10 / dArea;
-            posY = dM01 / dArea;
-
-            // Draw a circle
-            circle( imgOriginal, Point(posX,posY), 16.0, Scalar( 0, 0, 255), 3, 8 );
-
-            cout << posX << "\t";
-            cout << posY << "\n\n";
-        }
-        imshow("Thresholded Image", imgThresholded); //show the thresholded image
-        //==================== object detection ===========================================================================//
 
         //==================== FIELD DETECTION ===========================================================================//
         Mat imgField;
@@ -289,14 +256,14 @@ int main( int argc, char** argv )
                 // Draw mass center
                 circle(imgOriginal, center, 3, CV_RGB(255,0,0), 2);
 
-                Mat quad = Mat::zeros(500, 500, CV_8UC3);
+
                 vector<Point2f> quad_pts;
                 quad_pts.push_back(Point2f(0, 0));
                 quad_pts.push_back(Point2f(quad.cols, 0));
                 quad_pts.push_back(Point2f(quad.cols, quad.rows));
                 quad_pts.push_back(Point2f(0, quad.rows));
                 Mat transmtx = getPerspectiveTransform(corners, quad_pts);
-                warpPerspective(imgOriginal, quad, transmtx, quad.size());
+                warpPerspective(imgOriginalCopy, quad, transmtx, quad.size());
 
                 //getchar();
                 imshow("Original", imgOriginal); //show the original image
@@ -305,6 +272,46 @@ int main( int argc, char** argv )
             }
         }
         //==================== generate lines ============================================================================//
+
+        //==================== OBJECT DETECTION ===========================================================================//
+        Mat imgHSVField;
+        cvtColor(quad, imgHSVField, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+
+        Mat imgThresholded;
+        inRange(imgHSVField, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
+
+        //morphological opening (removes small objects from the foreground)
+        erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+        dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+
+        //morphological closing (removes small holes from the foreground)
+        dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+        erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+
+        //Calculate the moments of the thresholded image
+        Moments oMoments = moments(imgThresholded);
+
+        double dM01 = oMoments.m01;
+        double dM10 = oMoments.m10;
+        double dArea = oMoments.m00;
+        int posX, posY;
+
+        // if the area <= 10000, I consider that the there are no object in the image
+        //and it's because of the noise, the area is not zero
+        if (dArea > 10000)
+        {
+            //calculate the position of the ball
+            posX = dM10 / dArea;
+            posY = dM01 / dArea;
+
+            // Draw a circle
+            circle( imgOriginalCopy, Point(posX,posY), 16.0, Scalar( 0, 0, 255), 3, 8 );
+
+            cout << posX << "\t";
+            cout << posY << "\n\n";
+        }
+        imshow("Thresholded Image", imgThresholded); //show the thresholded image
+        //==================== object detection ===========================================================================//
 
         //imshow("Edge Map", imgGray); //show the edge map
         //imgOriginal = imgOriginal + imgLines;
