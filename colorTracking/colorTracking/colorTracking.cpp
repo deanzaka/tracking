@@ -289,9 +289,19 @@ int main( int argc, char** argv )
                 // Draw mass center
                 circle(imgOriginal, center, 3, CV_RGB(255,0,0), 2);
 
-                getchar();
-                imshow("Original", imgOriginal); //show the original image
+                Mat quad = Mat::zeros(500, 500, CV_8UC3);
+                vector<Point2f> quad_pts;
+                quad_pts.push_back(Point2f(0, 0));
+                quad_pts.push_back(Point2f(quad.cols, 0));
+                quad_pts.push_back(Point2f(quad.cols, quad.rows));
+                quad_pts.push_back(Point2f(0, quad.rows));
+                Mat transmtx = getPerspectiveTransform(corners, quad_pts);
+                warpPerspective(imgOriginal, quad, transmtx, quad.size());
+
                 //getchar();
+                imshow("Original", imgOriginal); //show the original image
+                imshow("quadrilateral", quad); //show the prespective image
+                getchar();
             }
         }
         //==================== generate lines ============================================================================//
