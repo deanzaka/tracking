@@ -250,7 +250,25 @@ int main( int argc, char** argv )
                     center.y += corners[i].y;
                 }
                 center *= (1.0/ corners.size());
-                //sortCorners(corners, center);
+
+                // Sorting the corners
+                vector<Point2f> top, bot;
+                for (int i = 0; i < corners.size(); i++)
+                {
+                    if (corners[i].y < center.y)
+                        top.push_back(corners[i]);
+                    else
+                        bot.push_back(corners[i]);
+                }
+                Point2f tl = top[0].x > top[1].x ? top[1] : top[0];
+                Point2f tr = top[0].x > top[1].x ? top[0] : top[1];
+                Point2f bl = bot[0].x > bot[1].x ? bot[1] : bot[0];
+                Point2f br = bot[0].x > bot[1].x ? bot[0] : bot[1];
+                corners.clear();
+                corners.push_back(tl);
+                corners.push_back(tr);
+                corners.push_back(br);
+                corners.push_back(bl);
 
                 cout << "corners[0]: " << corners[0] << "\n";
                 cout << "corners[1]: " << corners[1] << "\n";
@@ -270,16 +288,17 @@ int main( int argc, char** argv )
                 }
                 // Draw mass center
                 circle(imgOriginal, center, 3, CV_RGB(255,0,0), 2);
-                //getchar();
-                imshow("Original", imgOriginal); //show the original image
+
                 getchar();
+                imshow("Original", imgOriginal); //show the original image
+                //getchar();
             }
         }
         //==================== generate lines ============================================================================//
 
         //imshow("Edge Map", imgGray); //show the edge map
         //imgOriginal = imgOriginal + imgLines;
-        imshow("Original", imgOriginal); //show the original image
+        //imshow("Original", imgOriginal); //show the original image
 
 
             if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
