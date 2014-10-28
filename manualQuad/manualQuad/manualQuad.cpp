@@ -26,28 +26,34 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata)
 
 int main(int argc, char** argv)
 {
-    // Read image from file
-    Mat img = imread("test.jpg");
+    VideoCapture cap(1); //capture the video from webcam
 
-    //if fail to read the image
-    if ( img.empty() )
+    if ( !cap.isOpened() )  // if not success, exit program
     {
-        cout << "Error loading the image" << endl;
+        cout << "Cannot open the web cam" << endl;
         return -1;
     }
 
-    //Create a window
-    namedWindow("My Window", 1);
+    while(1)
+    {
+        Mat imgOriginal;
+        cap.read(imgOriginal);
 
-    //set the callback function for any mouse event
-    setMouseCallback("My Window", CallBackFunc, NULL);
+        //Create a window
+        namedWindow("My Window", 1);
 
-    //show the image
-    imshow("My Window", img);
+        //set the callback function for any mouse event
+        setMouseCallback("Camera", CallBackFunc, NULL);
 
-    // Wait until user press some key
-    waitKey(0);
+        //show the image
+        imshow("Camera", imgOriginal);
 
+        if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
+        {
+            cout << "esc key is pressed, exit program" << endl;
+                break;
+        }
+    }
     return 0;
 
 }
