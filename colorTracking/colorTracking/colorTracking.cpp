@@ -241,9 +241,15 @@ int main( int argc, char** argv )
                 cout << "The object is quadrilateral! \n\n";
 
                 // Get mass center
+                Point2f center;
+                center.x = 0;
+                center.y = 0;
                 for (int i = 0; i < corners.size(); i++)
-                center += corners[i];
-                center *= (1.0 / corners.size());
+                {
+                    center.x += corners[i].x;
+                    center.y += corners[i].y;
+                }
+                center *= (1.0/ corners.size());
                 //sortCorners(corners, center);
 
                 cout << "corners[0]: " << corners[0] << "\n";
