@@ -15,13 +15,15 @@ Point2f tl;
 Point2f tr;
 Point2f bl;
 Point2f br;
+Point2f center;
+Mat imgOriginal;
 //=============== variables ========================================//
 
 void CallBackFunc(int event, int x, int y, int flags, void* userdata)
 {
     if  ( event == EVENT_LBUTTONDOWN )
     {
-        //cout << "Left button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
+        cout << "\n\n\nSET\n\n\n";
         xVal = x;
         yVal = y;
     }
@@ -59,7 +61,6 @@ int main(int argc, char** argv)
 
     while(1)
     {
-        Mat imgOriginal;
         cap.read(imgOriginal);
 
         //Create a window
@@ -89,7 +90,6 @@ int main(int argc, char** argv)
 
     while(1)
     {
-        Mat imgOriginal;
         cap.read(imgOriginal);
 
         //Create a window
@@ -119,7 +119,6 @@ int main(int argc, char** argv)
 
     while(1)
     {
-        Mat imgOriginal;
         cap.read(imgOriginal);
 
         //Create a window
@@ -138,7 +137,7 @@ int main(int argc, char** argv)
 
         if (waitKey(1) == 27) //wait for 'esc' key press for 1ms. If 'esc' key is pressed, break loop
         {
-            cout << "esc key is pressed, top left set" << endl;
+            cout << "esc key is pressed, bottom left set" << endl;
             cout << "bottom left: " << bl << "\n\n";
                 break;
         }
@@ -149,7 +148,6 @@ int main(int argc, char** argv)
 
     while(1)
     {
-        Mat imgOriginal;
         cap.read(imgOriginal);
 
         //Create a window
@@ -168,13 +166,41 @@ int main(int argc, char** argv)
 
         if (waitKey(1) == 27) //wait for 'esc' key press for 1ms. If 'esc' key is pressed, break loop
         {
-            cout << "esc key is pressed, top right set" << endl;
+            cout << "esc key is pressed, bottom right set" << endl;
             cout << "bottom right: " << br << "\n\n";
                 break;
         }
     }
 //============================== setup corners ======================================================//
+
+    center.x = (tl.x + tr.x + bl.x + br.x) / 4;
+    center.y = (tl.y + tr.y + bl.y + br.y) / 4;
+
     waitKey();
+
+    while(1)
+    {
+        cap.read(imgOriginal);
+
+        // Draw a circle
+        circle( imgOriginal, tl, 3.0, Scalar( 0, 0, 255), 3, 8 );
+        circle( imgOriginal, tr, 3.0, Scalar( 0, 0, 255), 3, 8 );
+        circle( imgOriginal, bl, 3.0, Scalar( 0, 0, 255), 3, 8 );
+        circle( imgOriginal, br, 3.0, Scalar( 0, 0, 255), 3, 8 );
+        circle( imgOriginal, center, 3.0, Scalar( 0, 0, 255), 3, 8 );
+
+        //Create a window
+        namedWindow("Camera", 1);
+
+        //show the image
+        imshow("Camera", imgOriginal);
+
+        if (waitKey(1) == 27) //wait for 'esc' key press for 1ms. If 'esc' key is pressed, break loop
+        {
+            cout << "esc key is pressed, exit program" << endl;
+                break;
+        }
+    }
     return 0;
 
 }
