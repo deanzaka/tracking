@@ -173,21 +173,30 @@ int main(int argc, char** argv)
     }
 //============================== setup corners ======================================================//
 
+
+//================================== DRAW AREA ======================================================//
+
+    // get mass center
     center.x = (tl.x + tr.x + bl.x + br.x) / 4;
     center.y = (tl.y + tr.y + bl.y + br.y) / 4;
 
     waitKey();
-
     while(1)
     {
         cap.read(imgOriginal);
 
-        // Draw a circle
+        // Draw circles on corner and center
         circle( imgOriginal, tl, 3.0, Scalar( 0, 0, 255), 3, 8 );
         circle( imgOriginal, tr, 3.0, Scalar( 0, 0, 255), 3, 8 );
         circle( imgOriginal, bl, 3.0, Scalar( 0, 0, 255), 3, 8 );
         circle( imgOriginal, br, 3.0, Scalar( 0, 0, 255), 3, 8 );
         circle( imgOriginal, center, 3.0, Scalar( 0, 0, 255), 3, 8 );
+
+        // Draw lines
+        line(imgOriginal, tl, tr, CV_RGB(0,255,0));
+        line(imgOriginal, tl, bl, CV_RGB(0,255,0));
+        line(imgOriginal, br, tr, CV_RGB(0,255,0));
+        line(imgOriginal, br, bl, CV_RGB(0,255,0));
 
         //Create a window
         namedWindow("Camera", 1);
@@ -201,6 +210,9 @@ int main(int argc, char** argv)
                 break;
         }
     }
+
+//================================== draw area ======================================================//
+
     return 0;
 
 }
