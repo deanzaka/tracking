@@ -76,9 +76,32 @@ int main(int argc, char** argv)
         return -1;
     }
 
+//============================== OBJECT CONTROL =====================================================//
+    namedWindow("Object", CV_WINDOW_AUTOSIZE); //create a window called "Object"
+
+    int iLowH = 0;
+    int iHighH = 10;
+
+    int iLowS = 135;
+    int iHighS = 255;
+
+    int iLowV = 50;
+    int iHighV = 255;
+
+    //Create trackbars in "Object" window
+    createTrackbar("LowH", "Object", &iLowH, 179); //Hue (0 - 179)
+    createTrackbar("HighH", "Object", &iHighH, 179);
+
+    createTrackbar("LowS", "Object", &iLowS, 255); //Saturation (0 - 255)
+    createTrackbar("HighS", "Object", &iHighS, 255);
+
+    createTrackbar("LowV", "Object", &iLowV, 255);//Value (0 - 255)
+    createTrackbar("HighV", "Object", &iHighV, 255);
+//============================== object control =====================================================//
+
+
 //============================== SETUP CORNERS ======================================================//
 
-    waitKey();
     cout << "Setup top left...\n Press any key to start, press esc when done \n\n";
     waitKey();
 
@@ -229,12 +252,6 @@ int main(int argc, char** argv)
         line(imgOriginal, br, tr, CV_RGB(0,255,0));
         line(imgOriginal, br, bl, CV_RGB(0,255,0));
 
-        //Create a window
-        namedWindow("Camera", 1);
-
-        //show the image
-        imshow("Camera", imgOriginal);
-
 //================================== draw area ======================================================//
 
 
@@ -250,13 +267,66 @@ int main(int argc, char** argv)
         Mat transmtx = getPerspectiveTransform(corners, quad_pts);
         warpPerspective(imgBuffer, quad, transmtx, quad.size());
 
+//============================== get prespective ====================================================//
+
+//==================== OBJECT DETECTION ===========================================================================//
+        Mat imgHSV;
+        cvtColor(quad, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+
+        Mat imgThresholded;
+        inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
+
+        //morphological opening (removes small objects from the foreground)
+        erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+        dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+
+        //morphological closing (removes small holes from the foreground)
+        dilate( imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+        erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)) );
+
+        //Calculate the moments of the thresholded image
+        Moments oMoments = moments(imgThresholded);
+
+        double dM01 = oMoments.m01;
+        double dM10 = oMoments.m10;
+        double dArea = oMoments.m00;
+        int posX, posY;
+
+        // if the area <= 10000, I consider that the there are no object in the image
+        //and it's because of the noise, the area is not zero
+        if (dArea > 10000)
+        {
+            //calculate the position of the ball
+            posX = dM10 / dArea;
+            posY = dM01 / dArea;
+
+            // Draw a circle
+            circle( quad, Point(posX,posY), 16.0, Scalar( 0, 0, 255), 3, 8 );
+
+            cout << posX << "\t";
+            cout << posY << "\n\n";
+        }
+//==================== object detection ===========================================================================//
+
+
+//========================== CREATE AND SHOW IMAGE ==================================================//
+
         //Create a window
-        namedWindow("Perspective", 1);
+        //namedWindow("Camera", 1);
+
+        //show the image
+        imshow("Camera", imgOriginal);
+
+        //Create a window
+        //namedWindow("Perspective", 1);
 
         //show the image
         imshow("Perspective", quad);
+        imshow("Thresholded Image", imgThresholded); //show the thresholded image
 
-//============================== get prespective ====================================================//
+//========================== create and show image ==================================================//
+
+
 
         if (waitKey(1) == 27) //wait for 'esc' key press for 1ms. If 'esc' key is pressed, break loop
         {
