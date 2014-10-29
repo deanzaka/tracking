@@ -1,5 +1,25 @@
-#include "opencv2/highgui/highgui.hpp"
+#include <vector>
+#include <cv.h>
+#include <cvaux.h>
+#include <highgui.h>
 #include <iostream>
+#include <list>
+
+#include <opencv2/video/background_segm.hpp>
+#include <opencv2/legacy/blobtrack.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc_c.h>
+
+#include <opencv2/core/core.hpp>
+#include <opencv2/video/tracking.hpp>
+
+#include <math.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/ioctl.h>
+#include <fcntl.h>
+#include <termios.h>
 
 using namespace std;
 using namespace cv;
@@ -17,6 +37,9 @@ Point2f bl;
 Point2f br;
 Point2f center;
 Mat imgOriginal;
+Mat imgBuffer;
+Mat quad = Mat::zeros(500, 500, CV_8UC3);
+vector<Point2f> corners;
 //=============== variables ========================================//
 
 void CallBackFunc(int event, int x, int y, int flags, void* userdata)
@@ -206,12 +229,48 @@ int main(int argc, char** argv)
 
         if (waitKey(1) == 27) //wait for 'esc' key press for 1ms. If 'esc' key is pressed, break loop
         {
-            cout << "esc key is pressed, exit program" << endl;
+            cout << "esc key is pressed" << endl;
                 break;
         }
     }
 
 //================================== draw area ======================================================//
+
+//============================== GET PRESPECTIVE ====================================================//
+
+    waitKey();
+    while(1)
+    {
+        cap.read(imgBuffer);
+
+        corners.clear();
+        corners.push_back(tl);
+        corners.push_back(tr);
+        corners.push_back(br);
+        corners.push_back(bl);
+
+        vector<Point2f> quad_pts;
+        quad_pts.push_back(Point2f(0, 0));
+        quad_pts.push_back(Point2f(quad.cols, 0));
+        quad_pts.push_back(Point2f(quad.cols, quad.rows));
+        quad_pts.push_back(Point2f(0, quad.rows));
+        Mat transmtx = getPerspectiveTransform(corners, quad_pts);
+        warpPerspective(imgBuffer, quad, transmtx, quad.size());
+
+        //Create a window
+        namedWindow("Perspective", 1);
+
+        //show the image
+        imshow("Perspective", quad);
+
+        if (waitKey(1) == 27) //wait for 'esc' key press for 1ms. If 'esc' key is pressed, break loop
+        {
+            cout << "esc key is pressed, exit program" << endl;
+                break;
+        }
+    }
+
+//============================== get prespective ====================================================//
 
     return 0;
 
