@@ -197,15 +197,23 @@ int main(int argc, char** argv)
 //============================== setup corners ======================================================//
 
 
-//================================== DRAW AREA ======================================================//
-
     // get mass center
     center.x = (tl.x + tr.x + bl.x + br.x) / 4;
     center.y = (tl.y + tr.y + bl.y + br.y) / 4;
 
+    // input corners to array corners
+    corners.clear();
+    corners.push_back(tl);
+    corners.push_back(tr);
+    corners.push_back(br);
+    corners.push_back(bl);
+
     waitKey();
     while(1)
     {
+
+//================================== DRAW AREA ======================================================//
+
         cap.read(imgOriginal);
 
         // Draw circles on corner and center
@@ -227,27 +235,12 @@ int main(int argc, char** argv)
         //show the image
         imshow("Camera", imgOriginal);
 
-        if (waitKey(1) == 27) //wait for 'esc' key press for 1ms. If 'esc' key is pressed, break loop
-        {
-            cout << "esc key is pressed" << endl;
-                break;
-        }
-    }
-
 //================================== draw area ======================================================//
+
 
 //============================== GET PRESPECTIVE ====================================================//
 
-    waitKey();
-    while(1)
-    {
         cap.read(imgBuffer);
-
-        corners.clear();
-        corners.push_back(tl);
-        corners.push_back(tr);
-        corners.push_back(br);
-        corners.push_back(bl);
 
         vector<Point2f> quad_pts;
         quad_pts.push_back(Point2f(0, 0));
@@ -263,15 +256,14 @@ int main(int argc, char** argv)
         //show the image
         imshow("Perspective", quad);
 
+//============================== get prespective ====================================================//
+
         if (waitKey(1) == 27) //wait for 'esc' key press for 1ms. If 'esc' key is pressed, break loop
         {
-            cout << "esc key is pressed, exit program" << endl;
+            cout << "esc key is pressed" << endl;
                 break;
         }
     }
-
-//============================== get prespective ====================================================//
-
     return 0;
 
 }
