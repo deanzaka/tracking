@@ -1,25 +1,5 @@
-#include <vector>
 #include <cv.h>
-#include <cvaux.h>
 #include <highgui.h>
-#include <iostream>
-#include <list>
-
-#include <opencv2/video/background_segm.hpp>
-#include <opencv2/legacy/blobtrack.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc_c.h>
-
-#include <opencv2/core/core.hpp>
-#include <opencv2/video/tracking.hpp>
-
-#include <math.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
-#include <termios.h>
 
 using namespace std;
 using namespace cv;
