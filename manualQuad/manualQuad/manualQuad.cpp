@@ -7,16 +7,16 @@ using namespace cv;
 
 //=============== VARIABLES ========================================//
 int xVal, yVal, xHover, yHover;
-int fWidth = 500; //in pixels
-int fLength = 500; //in pixels
-int rWidth = 180; //in cm
-int rLength = 180; //in cm
+int fWidth = 720; //in pixels
+int fLength = 480; //in pixels
+int rWidth = 360; //in cm
+int rLength = 240; //in cm
 Point2f tl, tr, bl, br;
 Point2f center, rCenter;
 Mat imgOriginal;
 Mat imgBuffer;
-Mat quad = Mat::zeros(fWidth, fLength, CV_8UC3);
-Mat quadCopy = Mat::zeros(fWidth, fLength, CV_8UC3);
+Mat quad = Mat::zeros(fLength, fWidth, CV_8UC3);
+Mat quadCopy = Mat::zeros(fLength, fWidth, CV_8UC3);
 vector<Point2f> corners;
 double deg, h, l;
 double dist = 58; //in cm
