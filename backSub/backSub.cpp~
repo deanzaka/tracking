@@ -16,7 +16,7 @@ Ptr<BackgroundSubtractor> pMOG; //MOG Background subtractor
 
 int main(int argc, char** argv)
 {
-  VideoCapture cap(0); // Capture video form camera
+  VideoCapture cap(1); // Capture video form camera
   if(!cap.isOpened()) // if not success, exit program
   {
     cout << "cannot open camera" << endl;

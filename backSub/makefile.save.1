@@ -1,0 +1,6 @@
+CFLAGS = `pkg-config --cflags opencv`
+LIBS = `pkg-config --libs opencv`
+
+% : %.cpp
+	g++ -ggdb $(CFLAGS) $(LIBS) -o $@ $<
+	g++ -ggdb `pkg-config --cflags opencv` -o `basename $i .cpp` $i `pkg-config --libs opencv`
