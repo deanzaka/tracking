@@ -102,9 +102,6 @@ class MyFreenectDevice : public Freenect::FreenectDevice {
 
 
 int main(int argc, char **argv) {
- 	string filename("snapshot");
- 	string suffix(".png");
- 	int i_snap(0);
 
  	Mat depthMat(Size(640,480),CV_16UC1);
  	Mat depthf (Size(640,480),CV_8UC1);
@@ -125,21 +122,11 @@ int main(int argc, char **argv) {
  		cv::imshow("rgb", rgbMat);
  		depthMat.convertTo(depthf, CV_8UC1, 255.0/2048.0);
  		cv::imshow("depth",depthf);
- 		char k = cvWaitKey(5);
- 		if( k == 27 ){
- 			cvDestroyWindow("rgb");
- 			cvDestroyWindow("depth");
- 			break;
- 		}
- 		if( k == 8 ) {
- 			std::ostringstream file;
- 			file << filename << i_snap << suffix;
- 			cv::imwrite(file.str(),rgbMat);
- 			i_snap++;
- 		}
 
  		if (waitKey(1) == 27) //wait for 'esc' key press for 1ms. If 'esc' key is pressed, break loop
         {
+            cvDestroyWindow("rgb");
+ 			cvDestroyWindow("depth");
             cout << "exit application" << endl;
                 break;
         }
