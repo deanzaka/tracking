@@ -102,21 +102,14 @@ class MyFreenectDevice : public Freenect::FreenectDevice {
 
 
 int main(int argc, char **argv) {
- 	bool die(false);
  	string filename("snapshot");
  	string suffix(".png");
- 	int i_snap(0),iter(0);
+ 	int i_snap(0);
 
  	Mat depthMat(Size(640,480),CV_16UC1);
  	Mat depthf (Size(640,480),CV_8UC1);
  	Mat rgbMat(Size(640,480),CV_8UC3,Scalar(0));
  	Mat ownMat(Size(640,480),CV_8UC3,Scalar(0));
-
-	// The next two lines must be changed as Freenect::Freenect
-	// isn't a template but the method createDevice:
-	// Freenect::Freenect<MyFreenectDevice> freenect;
-	// MyFreenectDevice& device = freenect.createDevice(0);
-	// by these two lines:
 
  	Freenect::Freenect freenect;
  	MyFreenectDevice& device = freenect.createDevice<MyFreenectDevice>(0);
@@ -125,7 +118,8 @@ int main(int argc, char **argv) {
  	namedWindow("depth",CV_WINDOW_AUTOSIZE);
  	device.startVideo();
  	device.startDepth();
- 	while (!die) {
+ 	
+ 	while (1) {
  		device.getVideo(rgbMat);
  		device.getDepth(depthMat);
  		cv::imshow("rgb", rgbMat);
@@ -143,8 +137,12 @@ int main(int argc, char **argv) {
  			cv::imwrite(file.str(),rgbMat);
  			i_snap++;
  		}
- 		if(iter >= 1000) break;
- 		iter++;
+
+ 		if (waitKey(1) == 27) //wait for 'esc' key press for 1ms. If 'esc' key is pressed, break loop
+        {
+            cout << "exit application" << endl;
+                break;
+        }
  	}
 
  	device.stopVideo();
