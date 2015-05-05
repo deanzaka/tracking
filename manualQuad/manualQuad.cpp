@@ -7,10 +7,10 @@ using namespace cv;
 
 //=============== VARIABLES ========================================//
 int xVal, yVal, xHover, yHover;
-int fWidth = 720; //in pixels
-int fLength = 480; //in pixels
-int rWidth = 360; //in cm
-int rLength = 240; //in cm
+int fWidth = 480; //in pixels
+int fLength = 360; //in pixels
+int rWidth = 240; //in cm
+int rLength = 180; //in cm
 Point2f tl, tr, bl, br;
 Point2f center, rCenter;
 Mat imgOriginal;
@@ -443,8 +443,8 @@ int main(int argc, char** argv)
         imshow("Camera", imgOriginal);
         imshow("Perspective", quadCopy);
         imshow("Thresholded Image", imgThresholded); //show the thresholded image
-        imshow("Left Bot", imgLeft); //show the thresholded image
-        imshow("Right Bot", imgRight); //show the thresholded image
+        // imshow("Left Bot", imgLeft); //show the thresholded image
+        // imshow("Right Bot", imgRight); //show the thresholded image
 
 
 //========================== create and show image ==================================================//
