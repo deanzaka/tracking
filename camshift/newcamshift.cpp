@@ -13,6 +13,7 @@ bool selectObject = false;
 int trackObject = 0;
 Point origin;
 Rect selection;
+int vmin = 10, vmax = 256, smin = 30;
 
 static void onMouse( int event, int x, int y, int, void* )
 {
@@ -43,7 +44,8 @@ static void onMouse( int event, int x, int y, int, void* )
 
 int main( int argc, const char** argv )
 {
-	Mat hue, hsv, hist, histimg = Mat::zeros(200, 320, CV_8UC3), backproj;
+	Mat hue, hsv, hist, histimg, mask = Mat::zeros(200, 320, CV_8UC3), backproj;
+	Rect trackWindow;
 	int hsize = 16;
 	float hranges[] = {0,180};
 	const float* phranges = hranges;
@@ -55,41 +57,57 @@ int main( int argc, const char** argv )
 	while(1) {
 		testImage  = imread("digimon.jpg");
 		cvtColor(testImage, hsv, CV_BGR2HSV);
-		int ch[]={0,0};
-		hue.create(hsv.size(), hsv.depth());
-		mixChannels(&hsv, 1, &hue, 1, ch, 1);								// copying only hue values
-		
-		calcHist(&hue, 1, 0, Mat(), hist, 1, &hsize, &phranges);				// calculate histogram
-		normalize(hist, hist, 0,255, CV_MINMAX);							// normalize value to min 0 to max 255
-		calcBackProject( &hue, 1, 0, hist, backproj, &phranges, 1, true );		// calculate back projection of image, by histogram
 
-		histimg = Scalar::all(0);
-	      	int binW = histimg.cols / hsize;
-	      	Mat buf(1, hsize, CV_8UC3);
-	      	for( int i = 0; i < hsize; i++ )
-	          buf.at<Vec3b>(i) = Vec3b(saturate_cast<uchar>(i*180./hsize), 255, 255);
-	      	cvtColor(buf, buf, CV_HSV2BGR);
+      		if (trackObject) {
+      			int _vmin = vmin, _vmax = vmax;
+                	inRange(hsv, Scalar(0, smin, MIN(_vmin,_vmax)),
+                        		Scalar(180, 256, MAX(_vmin, _vmax)), mask);
+			int ch[]={0,0};
+			hue.create(hsv.size(), hsv.depth());
+			mixChannels(&hsv, 1, &hue, 1, ch, 1);									// copying only hue values
 
-	      	for( int i = 0; i < hsize; i++ )
-	      {
-	          int val = saturate_cast<int>(hist.at<float>(i)*histimg.rows/255);
-	          rectangle( histimg, Point(i*binW,histimg.rows),
-	                     Point((i+1)*binW,histimg.rows - val),
-	                     Scalar(buf.at<Vec3b>(i)), -1, 8 );
-	      }
+			if(trackObject < 0) {
 
-	      	imshow("histogram image", histimg);
-	    	
-	  	if( selectObject && selection.width > 0 && selection.height > 0 )
-	       {
-	            	Mat roi(testImage, selection);
-	            	bitwise_not(roi, roi);
-	       }
+				Mat roi(hue, selection), maskroi(mask, selection);					// select region of interest
+		      		calcHist(&roi, 1, 0, maskroi, hist, 1, &hsize, &phranges);			// calculate histogram
+				normalize(hist, hist, 0,255, CV_MINMAX);							// normalize value to min 0 to max 255
+				
+				trackWindow = selection;
+	      			trackObject = 1;
 
-	       cout << "\n selection width: " << selection.width << "\t";    
-	       cout << "selection height: " << selection.height << "\t";
-	       cout << " select object: " << selectObject << "\n";
+				histimg = Scalar::all(0);
+			      	int binW = histimg.cols / hsize;
+			      	Mat buf(1, hsize, CV_8UC3);
+			      	for( int i = 0; i < hsize; i++ )
+			          buf.at<Vec3b>(i) = Vec3b(saturate_cast<uchar>(i*180./hsize), 255, 255);
+			      	cvtColor(buf, buf, CV_HSV2BGR);
 
+			      	for( int i = 0; i < hsize; i++ )
+			      {
+			          int val = saturate_cast<int>(hist.at<float>(i)*histimg.rows/255);
+			          rectangle( histimg, Point(i*binW,histimg.rows),
+			                     Point((i+1)*binW,histimg.rows - val),
+			                     Scalar(buf.at<Vec3b>(i)), -1, 8 );
+			      }
+			}
+		    	
+		  	if( selectObject && selection.width > 0 && selection.height > 0 )
+		       {
+		            	Mat roi(testImage, selection);
+		            	bitwise_not(roi, roi);
+		       }
+
+		       cout << "\n selection width: " << selection.width << "\t";    
+		       cout << "selection height: " << selection.height << "\t";
+		       cout << "select object: " << selectObject << "\t";
+		}
+
+
+		cout << "track object: " << trackObject << "\n";
+
+		if(!histimg.empty()) {
+	      		imshow("histogram image", histimg);
+	      	}
 		imshow("test image", testImage);
 
 		if (waitKey(1) == 27) //wait for 'esc' key press for 1ms. If 'esc' key is pressed, break loop
