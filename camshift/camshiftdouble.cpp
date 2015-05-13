@@ -8,39 +8,39 @@
 using namespace cv;
 using namespace std;
 
-Mat image;
+Mat image1;
 
 bool backprojMode = false;
-bool selectObject = false;
-int trackObject = 0;
+bool selectObject1 = false;
+int trackObject1 = 0;
 bool showHist = true;
-Point origin;
-Rect selection;
-int vmin = 10, vmax = 256, smin = 30;
+Point origin1;
+Rect selection1;
+int vmin1 = 10, vmax1 = 256, smin1 = 30;
 
 static void onMouse( int event, int x, int y, int, void* )
 {
-    if( selectObject )
+    if( selectObject1 )
     {
-        selection.x = MIN(x, origin.x);
-        selection.y = MIN(y, origin.y);
-        selection.width = std::abs(x - origin.x);
-        selection.height = std::abs(y - origin.y);
+        selection1.x = MIN(x, origin1.x);
+        selection1.y = MIN(y, origin1.y);
+        selection1.width = std::abs(x - origin1.x);
+        selection1.height = std::abs(y - origin1.y);
 
-        selection &= Rect(0, 0, image.cols, image.rows);
+        selection1 &= Rect(0, 0, image1.cols, image1.rows);
     }
 
     switch( event )
     {
     case CV_EVENT_LBUTTONDOWN:
-        origin = Point(x,y);
-        selection = Rect(x,y,0,0);
-        selectObject = true;
+        origin1 = Point(x,y);
+        selection1 = Rect(x,y,0,0);
+        selectObject1 = true;
         break;
     case CV_EVENT_LBUTTONUP:
-        selectObject = false;
-        if( selection.width > 0 && selection.height > 0 )
-            trackObject = -1;
+        selectObject1 = false;
+        if( selection1.width > 0 && selection1.height > 0 )
+            trackObject1 = -1;
         break;
     }
 }
@@ -80,9 +80,9 @@ int main( int argc, const char** argv )
     namedWindow( "Histogram", 0 );
     namedWindow( "CamShift Demo", 0 );
     setMouseCallback( "CamShift Demo", onMouse, 0 );
-    createTrackbar( "Vmin", "CamShift Demo", &vmin, 256, 0 );
-    createTrackbar( "Vmax", "CamShift Demo", &vmax, 256, 0 );
-    createTrackbar( "Smin", "CamShift Demo", &smin, 256, 0 );
+    createTrackbar( "Vmin", "CamShift Demo", &vmin1, 256, 0 );
+    createTrackbar( "Vmax", "CamShift Demo", &vmax1, 256, 0 );
+    createTrackbar( "Smin", "CamShift Demo", &smin1, 256, 0 );
 
     Mat frame1, hsv1, hue1, mask1, hist1, histimg1 = Mat::zeros(200, 320, CV_8UC3), backproj1;
     bool paused = false;
@@ -96,30 +96,30 @@ int main( int argc, const char** argv )
                 break;
         }
 
-        frame1.copyTo(image);
+        frame1.copyTo(image1);
 
         if( !paused )
         {
-            cvtColor(image, hsv1, COLOR_BGR2HSV);
+            cvtColor(image1, hsv1, COLOR_BGR2HSV);
 
-            if( trackObject )
+            if( trackObject1 )
             {
-                int _vmin = vmin, _vmax = vmax;
+                int _vmin1 = vmin1, _vmax1 = vmax1;
 
-                inRange(hsv1, Scalar(0, smin, MIN(_vmin,_vmax)),
-                        Scalar(180, 256, MAX(_vmin, _vmax)), mask1);
+                inRange(hsv1, Scalar(0, smin1, MIN(_vmin1,_vmax1)),
+                        Scalar(180, 256, MAX(_vmin1, _vmax1)), mask1);
                 int ch[] = {0, 0};
                 hue1.create(hsv1.size(), hsv1.depth());
                 mixChannels(&hsv1, 1, &hue1, 1, ch, 1);
 
-                if( trackObject < 0 )
+                if( trackObject1 < 0 )
                 {
-                    Mat roi(hue1, selection), maskroi(mask1, selection);
+                    Mat roi(hue1, selection1), maskroi(mask1, selection1);
                     calcHist(&roi, 1, 0, maskroi, hist1, 1, &hsize, &phranges);
                     normalize(hist1, hist1, 0, 255, CV_MINMAX);
 
-                    trackWindow = selection;
-                    trackObject = 1;
+                    trackWindow = selection1;
+                    trackObject1 = 1;
 
                     histimg1 = Scalar::all(0);
                     int binW = histimg1.cols / hsize;
@@ -150,20 +150,20 @@ int main( int argc, const char** argv )
                 }
 
                 if( backprojMode )
-                    cvtColor( backproj1, image, COLOR_GRAY2BGR );
-                ellipse( image, trackBox, Scalar(0,0,255), 3, CV_AA );
+                    cvtColor( backproj1, image1, COLOR_GRAY2BGR );
+                ellipse( image1, trackBox, Scalar(0,0,255), 3, CV_AA );
             }
         }
-        else if( trackObject < 0 )
+        else if( trackObject1 < 0 )
             paused = false;
 
-        if( selectObject && selection.width > 0 && selection.height > 0 )
+        if( selectObject1 && selection1.width > 0 && selection1.height > 0 )
         {
-            Mat roi(image, selection);
+            Mat roi(image1, selection1);
             bitwise_not(roi, roi);
         }
 
-        imshow( "CamShift Demo", image );
+        imshow( "CamShift Demo", image1 );
         imshow( "Histogram", histimg1 );
 
         char c = (char)waitKey(10);
@@ -175,7 +175,7 @@ int main( int argc, const char** argv )
             backprojMode = !backprojMode;
             break;
         case 'c':
-            trackObject = 0;
+            trackObject1 = 0;
             histimg1 = Scalar::all(0);
             break;
         case 'h':
