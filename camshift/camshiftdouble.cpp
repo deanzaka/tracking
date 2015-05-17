@@ -270,7 +270,7 @@ int main( int argc, const char** argv )
 
 
         }
-        else if( trackObject1 < 0 || trackObject2 < 0 )
+        else if( trackObject1 < 0 && trackObject2 < 0 )
             paused = false;
 
         if( selectObject1 && selection1.width > 0 && selection1.height > 0 )
