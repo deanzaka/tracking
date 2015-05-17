@@ -291,7 +291,7 @@ int main( int argc, const char** argv )
         imshow( "Histogram 2", histimg2 );
 
 
-        char c = (char)waitKey(10);
+        char c = (char)waitKey(40);
         if( c == 27 )
             break;
         switch(c)

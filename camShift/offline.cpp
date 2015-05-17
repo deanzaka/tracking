@@ -95,29 +95,26 @@ int main( int argc, const char** argv )
 {
     help();
 
-    VideoCapture cap1;
-    Rect trackWindow1;
-    VideoCapture cap2;
+    VideoCapture inputVideo("video1.avi");              // Open input
+    if (!inputVideo.isOpened())
+    {
+        cout  << "Could not open the input video" << endl;
+        return -1;
+    }
+
+    int ex = static_cast<int>(inputVideo.get(CV_CAP_PROP_FOURCC));     // Get Codec Type- Int form
+
+    // Transform from int to char via Bitwise operators
+    char EXT[] = {(char)(ex & 0XFF) , (char)((ex & 0XFF00) >> 8),(char)((ex & 0XFF0000) >> 16),(char)((ex & 0XFF000000) >> 24), 0};
+
+    Size S = Size((int) inputVideo.get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
+                  (int) inputVideo.get(CV_CAP_PROP_FRAME_HEIGHT));
+
+    Rect trackWindow1;\
     Rect trackWindow2;
     int hsize = 16;
     float hranges[] = {0,180};
     const float* phranges = hranges;
-
-    cap1.open(1);
-    cap2.open(2);
-
-
-    if( !cap1.isOpened() )
-    {
-        cout << "***Could not initialize capturing camera 2...***\n";
-        return -1;
-    }
-
-    if( !cap2.isOpened() )
-    {
-        cout << "***Could not initialize capturing camera 2...***\n";
-        return -1;
-    }
 
     namedWindow( "Histogram 1", 0 );
     namedWindow( "Histogram 2", 0 );
@@ -143,13 +140,13 @@ int main( int argc, const char** argv )
     {
         if( !paused )
         {
-            cap1 >> frame1;
+            inputVideo >> frame1;
             if( frame1.empty() )
                 break;
         }
         if( !paused )
         {
-            cap2 >> frame2;
+            inputVideo >> frame2;
             if( frame2.empty() )
                 break;
         }
@@ -291,7 +288,7 @@ int main( int argc, const char** argv )
         imshow( "Histogram 2", histimg2 );
 
 
-        char c = (char)waitKey(10);
+        char c = (char)waitKey(40);
         if( c == 27 )
             break;
         switch(c)
