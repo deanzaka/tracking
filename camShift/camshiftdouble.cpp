@@ -212,7 +212,12 @@ int main( int argc, const char** argv )
 
                 if( backprojMode )
                     cvtColor( backproj1, image1, COLOR_GRAY2BGR );
-                ellipse( image1, trackBox1, Scalar(0,0,255), 3, CV_AA );
+                if(trackBox1.size.width != 0 && trackBox1.size.height != 0 )
+                    ellipse( image1, trackBox1, Scalar(0,0,255), 3, CV_AA );
+                
+                cout << "\nCam 1 XY Position: \t";
+                cout << trackBox1.center.x << "\t" << trackBox1.center.y;
+
             }
 
 
@@ -265,7 +270,12 @@ int main( int argc, const char** argv )
 
                 if( backprojMode )
                     cvtColor( backproj2, image2, COLOR_GRAY2BGR );
-                ellipse( image2, trackBox2, Scalar(0,0,255), 3, CV_AA );
+                if(trackBox2.size.width != 0 && trackBox2.size.height != 0 )
+                    ellipse( image2, trackBox2, Scalar(0,0,255), 3, CV_AA );
+                
+                cout << "\nCam 2 XY Position: \t";
+                cout << trackBox2.center.x << "\t" << trackBox2.center.y << "\n";
+
             }
 
 

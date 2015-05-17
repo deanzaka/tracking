@@ -110,7 +110,7 @@ int main( int argc, const char** argv )
     Size S = Size((int) inputVideo.get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
                   (int) inputVideo.get(CV_CAP_PROP_FRAME_HEIGHT));
 
-    Rect trackWindow1;\
+    Rect trackWindow1;
     Rect trackWindow2;
     int hsize = 16;
     float hranges[] = {0,180};
@@ -263,8 +263,8 @@ int main( int argc, const char** argv )
                 if( backprojMode )
                     cvtColor( backproj2, image2, COLOR_GRAY2BGR );
                 ellipse( image2, trackBox2, Scalar(0,0,255), 3, CV_AA );
-            }
 
+            }
 
         }
         else if( trackObject1 < 0 && trackObject2 < 0 )
