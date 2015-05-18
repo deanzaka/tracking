@@ -31,20 +31,31 @@ using namespace std;
 
 int main( int argc, char** argv )
 {
-    VideoCapture cap1(1); //capture the video from webcam
-    VideoCapture cap2(2); //capture the video from webcam
-
-    if ( !cap1.isOpened() )  // if not success, exit program
+     VideoCapture inputVideo1("../doubleRecord/video1.avi");              // Open input
+    if (!inputVideo1.isOpened())
     {
-        cout << "Cannot open the web cam" << endl;
+        cout  << "Could not open the input video 1" << endl;
         return -1;
     }
 
-    if ( !cap2.isOpened() )  // if not success, exit program
+    VideoCapture inputVideo2("../doubleRecord/video2.avi");              // Open input
+    if (!inputVideo2.isOpened())
     {
-        cout << "Cannot open the web cam" << endl;
+        cout  << "Could not open the input video 1" << endl;
         return -1;
     }
+
+    int ex1 = static_cast<int>(inputVideo1.get(CV_CAP_PROP_FOURCC));     // Get Codec Type- Int form
+    int ex2 = static_cast<int>(inputVideo2.get(CV_CAP_PROP_FOURCC));     // Get Codec Type- Int form
+
+    // Transform from int to char via Bitwise operators
+    char EXT1[] = {(char)(ex1 & 0XFF) , (char)((ex1 & 0XFF00) >> 8),(char)((ex1 & 0XFF0000) >> 16),(char)((ex1 & 0XFF000000) >> 24), 0};
+    char EXT2[] = {(char)(ex2 & 0XFF) , (char)((ex2 & 0XFF00) >> 8),(char)((ex2 & 0XFF0000) >> 16),(char)((ex2 & 0XFF000000) >> 24), 0};
+
+    Size S1 = Size((int) inputVideo1.get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
+                  (int) inputVideo1.get(CV_CAP_PROP_FRAME_HEIGHT));
+    Size S2 = Size((int) inputVideo2.get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
+                  (int) inputVideo2.get(CV_CAP_PROP_FRAME_HEIGHT));
 
     //=============== OBJECT CONTROL ==============================================//
     namedWindow("Object", CV_WINDOW_AUTOSIZE); //create a window called "Object"
@@ -86,8 +97,8 @@ int main( int argc, char** argv )
     //Capture a temporary image from the camera
     Mat imgTmp1;
     Mat imgTmp2;
-    cap1.read(imgTmp1);
-    cap2.read(imgTmp2);
+    inputVideo1.read(imgTmp1);
+    inputVideo2.read(imgTmp2);
 
     Mat backSub1;
     Mat backSub2;
@@ -109,25 +120,25 @@ int main( int argc, char** argv )
     while (true)
     {
         Mat imgOriginal1;
-        bool bSuccess1 = cap1.read(imgOriginal1); // read a new frame from video
+        bool bSuccess1 = inputVideo1.read(imgOriginal1); // read a new frame from video
         Mat imgOriginalCopy1; // make copy of imgOriginal
-        cap1.read(imgOriginalCopy1);
+        inputVideo1.read(imgOriginalCopy1);
         
 
         Mat imgOriginal2;
-        bool bSuccess2 = cap2.read(imgOriginal2); // read a new frame from video
+        bool bSuccess2 = inputVideo2.read(imgOriginal2); // read a new frame from video
         Mat imgOriginalCopy2; // make copy of imgOriginal
-        cap2.read(imgOriginalCopy2);
+        inputVideo2.read(imgOriginalCopy2);
 
         if (!bSuccess1) //if not success, break loop
         {
-            cout << "Cannot read a frame from video stream" << endl;
+            cout << "Cannot read a file from video 1" << endl;
             break;
         }
 
         if (!bSuccess2) //if not success, break loop
         {
-            cout << "Cannot read a frame from video stream" << endl;
+            cout << "Cannot read a file from video 2" << endl;
             break;
         }
 
@@ -301,7 +312,7 @@ int main( int argc, char** argv )
   		}
   		else cout << "Unable to open file";
 
-        if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
+        if (waitKey(20) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
         {
         	myfile.close();
         	cout << "esc key is pressed by user" << endl;

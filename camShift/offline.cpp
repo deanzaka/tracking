@@ -299,7 +299,7 @@ int main( int argc, const char** argv )
         imshow( "Histogram 2", histimg2 );
 
 
-        char c = (char)waitKey(40);
+        char c = (char)waitKey(20);
         if( c == 27 )
             break;
         switch(c)
@@ -313,12 +313,14 @@ int main( int argc, const char** argv )
             break;
         case 'h':
             showHist = !showHist;
-            if( !showHist )
+            if( !showHist ) {
                 destroyWindow( "Histogram 1" );
                 destroyWindow( "Histogram 2" );
-            else
+            }
+            else {
                 namedWindow( "Histogram 1", 1 );
                 namedWindow( "Histogram 2", 1 );
+            }
             break;
         case 'p':
             paused = !paused;
