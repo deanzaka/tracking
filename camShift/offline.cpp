@@ -95,20 +95,31 @@ int main( int argc, const char** argv )
 {
     help();
 
-    VideoCapture inputVideo("video1.avi");              // Open input
-    if (!inputVideo.isOpened())
+    VideoCapture inputVideo1("../doubleRecord/video1.avi");              // Open input
+    if (!inputVideo1.isOpened())
     {
-        cout  << "Could not open the input video" << endl;
+        cout  << "Could not open the input video 1" << endl;
         return -1;
     }
 
-    int ex = static_cast<int>(inputVideo.get(CV_CAP_PROP_FOURCC));     // Get Codec Type- Int form
+    VideoCapture inputVideo2("../doubleRecord/video2.avi");              // Open input
+    if (!inputVideo2.isOpened())
+    {
+        cout  << "Could not open the input video 1" << endl;
+        return -1;
+    }
+
+    int ex1 = static_cast<int>(inputVideo1.get(CV_CAP_PROP_FOURCC));     // Get Codec Type- Int form
+    int ex2 = static_cast<int>(inputVideo2.get(CV_CAP_PROP_FOURCC));     // Get Codec Type- Int form
 
     // Transform from int to char via Bitwise operators
-    char EXT[] = {(char)(ex & 0XFF) , (char)((ex & 0XFF00) >> 8),(char)((ex & 0XFF0000) >> 16),(char)((ex & 0XFF000000) >> 24), 0};
+    char EXT1[] = {(char)(ex1 & 0XFF) , (char)((ex1 & 0XFF00) >> 8),(char)((ex1 & 0XFF0000) >> 16),(char)((ex1 & 0XFF000000) >> 24), 0};
+    char EXT2[] = {(char)(ex2 & 0XFF) , (char)((ex2 & 0XFF00) >> 8),(char)((ex2 & 0XFF0000) >> 16),(char)((ex2 & 0XFF000000) >> 24), 0};
 
-    Size S = Size((int) inputVideo.get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
-                  (int) inputVideo.get(CV_CAP_PROP_FRAME_HEIGHT));
+    Size S1 = Size((int) inputVideo1.get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
+                  (int) inputVideo1.get(CV_CAP_PROP_FRAME_HEIGHT));
+    Size S2 = Size((int) inputVideo2.get(CV_CAP_PROP_FRAME_WIDTH),    // Acquire input size
+                  (int) inputVideo2.get(CV_CAP_PROP_FRAME_HEIGHT));
 
     Rect trackWindow1;
     Rect trackWindow2;
@@ -140,13 +151,13 @@ int main( int argc, const char** argv )
     {
         if( !paused )
         {
-            inputVideo >> frame1;
+            inputVideo1 >> frame1;
             if( frame1.empty() )
                 break;
         }
         if( !paused )
         {
-            inputVideo >> frame2;
+            inputVideo2 >> frame2;
             if( frame2.empty() )
                 break;
         }
@@ -303,9 +314,11 @@ int main( int argc, const char** argv )
         case 'h':
             showHist = !showHist;
             if( !showHist )
-                destroyWindow( "Histogram" );
+                destroyWindow( "Histogram 1" );
+                destroyWindow( "Histogram 2" );
             else
-                namedWindow( "Histogram", 1 );
+                namedWindow( "Histogram 1", 1 );
+                namedWindow( "Histogram 2", 1 );
             break;
         case 'p':
             paused = !paused;
