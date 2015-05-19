@@ -31,17 +31,24 @@ using namespace std;
 
 int main( int argc, char** argv )
 {
-     VideoCapture inputVideo1("../doubleRecord/video1.avi");              // Open input
+    namedWindow("Background Substraction 1", 0);
+    namedWindow("Background Substraction 2", 0);
+    namedWindow("Thresholded Image 1", 0);
+    namedWindow("Thresholded Image 2", 0); 
+    namedWindow("Original 1", 0);
+    namedWindow("Original 2", 0);
+
+     VideoCapture inputVideo1("../input/video1.avi");              // Open input
     if (!inputVideo1.isOpened())
     {
         cout  << "Could not open the input video 1" << endl;
         return -1;
     }
 
-    VideoCapture inputVideo2("../doubleRecord/video2.avi");              // Open input
+    VideoCapture inputVideo2("../input/video2.avi");              // Open input
     if (!inputVideo2.isOpened())
     {
-        cout  << "Could not open the input video 1" << endl;
+        cout  << "Could not open the input video 2" << endl;
         return -1;
     }
 
@@ -312,7 +319,7 @@ int main( int argc, char** argv )
   		}
   		else cout << "Unable to open file";
 
-        if (waitKey(20) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
+        if (waitKey(1) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
         {
         	myfile.close();
         	cout << "esc key is pressed by user" << endl;

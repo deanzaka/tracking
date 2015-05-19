@@ -200,8 +200,13 @@ int main( int argc, const char** argv )
 
                 calcBackProject(&hue1, 1, 0, hist1, backproj1, &phranges);
                 backproj1 &= mask1;
-                RotatedRect trackBox1 = CamShift(backproj1, trackWindow1,
+                int flagShift1 = meanShift(backproj1, trackWindow1,
                                     TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
+                RotatedRect trackBox1;
+                if(flagShift1 != 0) {
+                    trackBox1 = CamShift(backproj1, trackWindow1,
+                                        TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
+                }
                 if( trackWindow1.area() <= 1 )
                 {
                     int cols = backproj1.cols, rows = backproj1.rows, r = (MIN(cols, rows) + 5)/6;
@@ -258,8 +263,13 @@ int main( int argc, const char** argv )
 
                 calcBackProject(&hue2, 1, 0, hist2, backproj2, &phranges);
                 backproj2 &= mask2;
-                RotatedRect trackBox2 = CamShift(backproj2, trackWindow2,
+                int flagShift2 = meanShift(backproj1, trackWindow1,
                                     TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
+                RotatedRect trackBox2;
+                if(flagShift2 != 0) {
+                    trackBox2 = CamShift(backproj2, trackWindow2,
+                                        TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
+                }
                 if( trackWindow2.area() <= 1 )
                 {
                     int cols = backproj2.cols, rows = backproj2.rows, r = (MIN(cols, rows) + 5)/6;
