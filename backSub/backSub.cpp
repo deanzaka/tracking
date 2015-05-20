@@ -3,8 +3,10 @@
 #include <iostream>
 #include <sstream>
 
+#include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/video/background_segm.hpp>
 
 using namespace std;
@@ -16,6 +18,7 @@ Ptr<BackgroundSubtractor> pMOG; //MOG Background subtractor
 
 int main(int argc, char** argv)
 {
+
   VideoCapture cap(0); // Capture video form camera
   if(!cap.isOpened()) // if not success, exit program
   {
@@ -36,6 +39,8 @@ int main(int argc, char** argv)
     //update the background model
     pMOG->operator()(frame, fgMaskMOG);
     
+    fastNlMeansDenoising(fgMaskMOG, fgMaskMOG, 3, 7, 21 );
+
     //show the current frame and the fg masks
     imshow("Frame", frame);
     imshow("FG Mask MOG", fgMaskMOG);
