@@ -36,9 +36,6 @@ int main(int argc, char** argv)
   //create Background Subtractor objects
   pMOG = new BackgroundSubtractorMOG2(); //MOG approach
   
-  // Set up the detector with default parameters.
-  SimpleBlobDetector blob;
-  
   while(1)
   {
     inputVideo.read(frame);
