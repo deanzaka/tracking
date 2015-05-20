@@ -48,8 +48,8 @@ int main( )
     KF.transitionMatrix = *(Mat_<float>(4, 4) << 1,0,1,0,   0,1,0,1,  0,0,1,0,  0,0,0,1);
     Mat_<float> measurement(2,1); measurement.setTo(Scalar(0));
      
-    KF.statePre.at<float>(0) = xHover;
-    KF.statePre.at<float>(1) = yHover;
+    KF.statePre.at<float>(0) = xHover; // initial value
+    KF.statePre.at<float>(1) = yHover; // initial value
     KF.statePre.at<float>(2) = 0;
     KF.statePre.at<float>(3) = 0;
     setIdentity(KF.measurementMatrix);
@@ -94,7 +94,7 @@ int main( )
         for (int i = 0; i < kalmanv.size()-1; i++) 
                 line(img, kalmanv[i], kalmanv[i+1], Scalar(0,155,255), 1);
 
-        waitKey(10);  
+        waitKey();  
     }
 
     return 0;
