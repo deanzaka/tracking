@@ -38,14 +38,14 @@ int main( int argc, char** argv )
     namedWindow("Original 1", 0);
     namedWindow("Original 2", 0);
 
-     VideoCapture inputVideo1("../input/video1.avi");              // Open input
+     VideoCapture inputVideo1("../doubleRecord/video1.avi");              // Open input
     if (!inputVideo1.isOpened())
     {
         cout  << "Could not open the input video 1" << endl;
         return -1;
     }
 
-    VideoCapture inputVideo2("../input/video2.avi");              // Open input
+    VideoCapture inputVideo2("../doubleRecord/video2.avi");              // Open input
     if (!inputVideo2.isOpened())
     {
         cout  << "Could not open the input video 2" << endl;
@@ -117,8 +117,8 @@ int main( int argc, char** argv )
 
     Ptr<BackgroundSubtractor> pMOG1; //MOG Background subtractor
     Ptr<BackgroundSubtractor> pMOG2; //MOG Background subtractor
-    pMOG1 = new BackgroundSubtractorMOG(); //MOG approach
-    pMOG2 = new BackgroundSubtractorMOG(); //MOG approach
+    pMOG1 = new BackgroundSubtractorMOG2(); //MOG approach
+    pMOG2 = new BackgroundSubtractorMOG2(); //MOG approach
   
     
     // make text file to save data
