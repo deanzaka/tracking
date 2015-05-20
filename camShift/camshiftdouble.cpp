@@ -38,6 +38,8 @@ Mat merged2;
 Ptr<BackgroundSubtractor> pMOG2; //MOG Background subtractor
 Mat channel2[3];
 
+float xCam1, yCam1, xCam2, yCam2;
+
 static void onMouse1( int event, int x, int y, int, void* )
 {
     if( selectObject1 )
@@ -181,12 +183,12 @@ int main( int argc, const char** argv )
         merge(channel1, 3, image1);
 
         //morphological opening (removes small objects from the foreground)
-        erode(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
-        dilate(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
+        erode(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
+        dilate(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
 
         //morphological closing (removes small holes from the foreground)
-        dilate(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
-        erode(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
+        dilate(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
+        erode(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
 
         pMOG2->operator()(image2, fgMaskMOG2);
         fgMaskMOG2.copyTo(channel2[2]);
@@ -195,12 +197,12 @@ int main( int argc, const char** argv )
         merge(channel2, 3, image2);
 
         //morphological opening (removes small objects from the foreground)
-        erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
-        dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
+        erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
+        dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
 
         //morphological closing (removes small holes from the foreground)
-        dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
-        erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
+        dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
+        erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
 
         if( !paused )
         {
@@ -262,7 +264,7 @@ int main( int argc, const char** argv )
                 if( backprojMode )
                     cvtColor( backproj1, image1, COLOR_GRAY2BGR );
                 if(trackBox1.size.width != 0 && trackBox1.size.height != 0 )
-                    ellipse( image1, trackBox1, Scalar(0,0,255), 3, CV_AA );
+                    ellipse( image1, trackBox1, Scalar(0,255,0), 3, CV_AA );
                 
                 cout << "\nCam 1 XY Position: \t";
                 cout << trackBox1.center.x << "\t" << trackBox1.center.y;
@@ -325,7 +327,7 @@ int main( int argc, const char** argv )
                 if( backprojMode )
                     cvtColor( backproj2, image2, COLOR_GRAY2BGR );
                 if(trackBox2.size.width != 0 && trackBox2.size.height != 0 )
-                    ellipse( image2, trackBox2, Scalar(0,0,255), 3, CV_AA );
+                    ellipse( image2, trackBox2, Scalar(0,255,0), 3, CV_AA );
                 
                 cout << "\nCam 2 XY Position: \t";
                 cout << trackBox2.center.x << "\t" << trackBox2.center.y << "\n";

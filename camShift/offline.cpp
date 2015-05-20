@@ -111,20 +111,35 @@ int main( int argc, const char** argv )
 {
     help();
 
-    KalmanFilter KF(4, 2, 0);
+    KalmanFilter KF1(4, 2, 0);
 
     // intialization of KF
-    KF.transitionMatrix = *(Mat_<float>(4, 4) << 1,0,1,0,   0,1,0,1,  0,0,1,0,  0,0,0,1);
-    Mat_<float> measurement(2,1); measurement.setTo(Scalar(0));
+    KF1.transitionMatrix = *(Mat_<float>(4, 4) << 1,0,1,0,   0,1,0,1,  0,0,1,0,  0,0,0,1);
+    Mat_<float> measurement1(2,1); measurement1.setTo(Scalar(0));
      
-    KF.statePre.at<float>(0) = 0; // initial value
-    KF.statePre.at<float>(1) = 0; // initial value
-    KF.statePre.at<float>(2) = 0;
-    KF.statePre.at<float>(3) = 0;
-    setIdentity(KF.measurementMatrix);
-    setIdentity(KF.processNoiseCov, Scalar::all(1e-4));
-    setIdentity(KF.measurementNoiseCov, Scalar::all(10));
-    setIdentity(KF.errorCovPost, Scalar::all(.1));
+    KF1.statePre.at<float>(0) = 0; // initial value
+    KF1.statePre.at<float>(1) = 0; // initial value
+    KF1.statePre.at<float>(2) = 0;
+    KF1.statePre.at<float>(3) = 0;
+    setIdentity(KF1.measurementMatrix);
+    setIdentity(KF1.processNoiseCov, Scalar::all(.005));
+    setIdentity(KF1.measurementNoiseCov, Scalar::all(1e-1));
+    setIdentity(KF1.errorCovPost, Scalar::all(.1));
+
+    KalmanFilter KF2(4, 2, 0);
+
+    // intialization of KF
+    KF2.transitionMatrix = *(Mat_<float>(4, 4) << 1,0,1,0,   0,1,0,1,  0,0,1,0,  0,0,0,1);
+    Mat_<float> measurement2(2,1); measurement2.setTo(Scalar(0));
+     
+    KF2.statePre.at<float>(0) = 0; // initial value
+    KF2.statePre.at<float>(1) = 0; // initial value
+    KF2.statePre.at<float>(2) = 0;
+    KF2.statePre.at<float>(3) = 0;
+    setIdentity(KF2.measurementMatrix);
+    setIdentity(KF2.processNoiseCov, Scalar::all(.005));
+    setIdentity(KF2.measurementNoiseCov, Scalar::all(1e-1));
+    setIdentity(KF2.errorCovPost, Scalar::all(.1));
 
     VideoCapture inputVideo1("../doubleRecord/video1.avi");              // Open input
     if (!inputVideo1.isOpened())
@@ -186,8 +201,10 @@ int main( int argc, const char** argv )
     {
         
         // First predict, to update the internal statePre variable
-        Mat prediction = KF.predict();
-        Point predictPt(prediction.at<float>(0),prediction.at<float>(1));
+        Mat prediction1 = KF1.predict();
+        Point predictPt1(prediction1.at<float>(0),prediction1.at<float>(1));
+        Mat prediction2 = KF2.predict();
+        Point predictPt2(prediction2.at<float>(0),prediction2.at<float>(1));
 
         if( !paused )
         {
@@ -283,6 +300,11 @@ int main( int argc, const char** argv )
                     trackBox1 = CamShift(backproj1, trackWindow1,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
                 }
+                else{
+                    Rect preWindow1(predictPt1.x, predictPt1.y, 50, 50); 
+                    trackBox1 = CamShift(backproj1, preWindow1,
+                                        TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
+                }
                 if( trackWindow1.area() <= 1 )
                 {
                     int cols = backproj1.cols, rows = backproj1.rows, r = (MIN(cols, rows) + 5)/6;
@@ -297,21 +319,24 @@ int main( int argc, const char** argv )
 
                 cout << "\nCam 1 Object Pixel Position: \t";
                 cout << trackBox1.center.x << "\t" << trackBox1.center.y;
-                xCam1 = trackBox1.center.x;
-                yCam1 = trackBox1.center.y;
+                if(trackBox1.center.x != 0 || trackBox1.center.y != 0) {
+                    xCam1 = trackBox1.center.x;
+                    yCam1 = trackBox1.center.y;
+
+                    measurement1(0) = xCam1;
+                    measurement1(1) = yCam1; 
+
+                    // The update phase 
+                    Mat estimated1 = KF1.correct(measurement1);
+                    Point statePt1(estimated1.at<float>(0),estimated1.at<float>(1));
+                }
+
+                prediction1 = KF1.predict();
+                Point predictPt1(prediction1.at<float>(0),prediction1.at<float>(1));
+                cout << "\nCam 1 Predicted Position: \t";
+                cout << predictPt1.x << "\t" << predictPt1.y;
+                circle(image1 , Point(  predictPt1.x,predictPt1.y), 16.0, Scalar( 0, 155, 255), 3, 8 );
             }
-
-             // Get mouse point
-            measurement(0) = xCam1;
-            measurement(1) = yCam1; 
-
-            // The update phase 
-            Mat estimated = KF.correct(measurement);
-            Point statePt(estimated.at<float>(0),estimated.at<float>(1));
-
-            cout << "\nCam 1 Predicted Position: \t";
-            cout << statePt.x << "\t" << statePt.y;
-
 
 
             if( trackObject2 )
@@ -358,6 +383,11 @@ int main( int argc, const char** argv )
                     trackBox2 = CamShift(backproj2, trackWindow2,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
                 }
+                else{
+                    Rect preWindow2(predictPt2.x, predictPt2.y, 50, 50); 
+                    trackBox2 = CamShift(backproj2, preWindow2,
+                                        TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
+                }
                 if( trackWindow2.area() <= 1 )
                 {
                     int cols = backproj2.cols, rows = backproj2.rows, r = (MIN(cols, rows) + 5)/6;
@@ -372,8 +402,23 @@ int main( int argc, const char** argv )
 
                 cout << "\nCam 2 Object Pixel Position: \t";
                 cout << trackBox2.center.x << "\t" << trackBox2.center.y << "\n";
-                xCam2 = trackBox2.center.x;
-                yCam2 = trackBox2.center.y;
+                if(trackBox2.center.x != 0 || trackBox2.center.y != 0) {
+                    xCam2 = trackBox2.center.x;
+                    yCam2 = trackBox2.center.y;
+
+                    measurement2(0) = xCam2;
+                    measurement2(1) = yCam2; 
+
+                    // The update phase 
+                    Mat estimated2 = KF2.correct(measurement2);
+                    Point statePt2(estimated2.at<float>(0),estimated2.at<float>(1));
+                }
+
+                prediction2 = KF2.predict();
+                Point predictPt2(prediction2.at<float>(0),prediction2.at<float>(1));
+                cout << "\nCam 2 Predicted Position: \t";
+                cout << predictPt2.x << "\t" << predictPt2.y;
+                circle(image2 , Point(  predictPt2.x,predictPt2.y), 16.0, Scalar( 0, 155, 255), 3, 8 );
             }
 
         }
