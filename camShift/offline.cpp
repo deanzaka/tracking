@@ -266,7 +266,7 @@ int main( int argc, const char** argv )
 
                 calcBackProject(&hue2, 1, 0, hist2, backproj2, &phranges);
                 backproj2 &= mask2;
-                int flagShift2 = meanShift(backproj1, trackWindow1,
+                int flagShift2 = meanShift(backproj2, trackWindow2,
                                     TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
                 RotatedRect trackBox2;
                 if(flagShift2 != 0) {
@@ -288,8 +288,8 @@ int main( int argc, const char** argv )
             }
 
         }
-        else if( trackObject1 < 0 && trackObject2 < 0 )
-            paused = false;
+        // else if( trackObject1 < 0 && trackObject2 < 0 )
+        //     paused = false;
 
         if( selectObject1 && selection1.width > 0 && selection1.height > 0 )
         {
