@@ -254,12 +254,12 @@ int main( int argc, const char** argv )
         merge(channel2, 3, image2);
 
         //morphological opening (removes small objects from the foreground)
-        erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(8, 8)) );
-        dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(8, 8)) );
+        erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
+        dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
 
         //morphological closing (removes small holes from the foreground)
-        dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(8, 8)) );
-        erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(8, 8)) );
+        dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
+        erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
 
         if( !paused )
         {
@@ -311,11 +311,17 @@ int main( int argc, const char** argv )
                     trackBox1 = CamShift(backproj1, trackWindow1,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
                 }
-                else {
+                else if(posZ > 5){
                     Rect preWindow1(predictPt1.x, predictPt1.y, 10, 10); 
                     trackBox1 = CamShift(backproj1, preWindow1,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
                 }
+                else {
+                    Rect preWindow1(xCam1, yCam1, 50, 50); 
+                    trackBox1 = CamShift(backproj1, preWindow1,
+                                        TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
+                }
+
                 if( trackWindow1.area() <= 1 )
                 {
                     int cols = backproj1.cols, rows = backproj1.rows, r = (MIN(cols, rows) + 5)/6;
@@ -398,11 +404,17 @@ int main( int argc, const char** argv )
                     trackBox2 = CamShift(backproj2, trackWindow2,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
                 }
-                else {
+                else if (posZ > 5) {
                     Rect preWindow2(predictPt2.x, predictPt2.y, 10, 10); 
                     trackBox2 = CamShift(backproj2, preWindow2,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
                 }
+                else {
+                    Rect preWindow2(xCam2, yCam2, 50, 50); 
+                    trackBox2 = CamShift(backproj2, preWindow2,
+                                        TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
+                }
+
                 if( trackWindow2.area() <= 1 )
                 {
                     int cols = backproj2.cols, rows = backproj2.rows, r = (MIN(cols, rows) + 5)/6;
