@@ -8,11 +8,14 @@
 
 #include <iostream>
 #include <ctype.h>
+#include <math.h>
+
+#define PI 3.14159265
 
 using namespace cv;
 using namespace std;
 
-Mat image1, image2;
+Mat image1, image2, imageOriginal1, imageOriginal2;
 
 bool showHist = true;
 bool backprojMode = false;
@@ -141,17 +144,17 @@ int main( int argc, const char** argv )
     setIdentity(KF2.measurementNoiseCov, Scalar::all(1e-1));
     setIdentity(KF2.errorCovPost, Scalar::all(.1));
 
-    VideoCapture inputVideo1("../doubleRecord/video1.avi");              // Open input
+    VideoCapture inputVideo1("../input/video2_mpeg4.avi");              // Open input
     if (!inputVideo1.isOpened())
     {
         cout  << "Could not open the input video 1" << endl;
         return -1;
     }
 
-    VideoCapture inputVideo2("../doubleRecord/video2.avi");              // Open input
+    VideoCapture inputVideo2("../input/video1_mpeg4.avi");              // Open input
     if (!inputVideo2.isOpened())
     {
-        cout  << "Could not open the input video 1" << endl;
+        cout  << "Could not open the input video 2" << endl;
         return -1;
     }
 
@@ -172,22 +175,28 @@ int main( int argc, const char** argv )
     int hsize = 16;
     float hranges[] = {0,180};
     const float* phranges = hranges;
+    
+    int posZ;
+    double posX1, posX2, posY1, posY2;
 
     namedWindow( "Histogram 1", 0 );
     namedWindow( "Histogram 2", 0 );
 
     namedWindow( "CamShift 1", 0 );
     setMouseCallback( "CamShift 1", onMouse1, 0 );
-    createTrackbar( "Vmin", "CamShift 1", &vmin1, 256, 0 );
-    createTrackbar( "Vmax", "CamShift 1", &vmax1, 256, 0 );
-    createTrackbar( "Smin", "CamShift 1", &smin1, 256, 0 );
+    // createTrackbar( "Vmin", "CamShift 1", &vmin1, 256, 0 );
+    // createTrackbar( "Vmax", "CamShift 1", &vmax1, 256, 0 );
+    // createTrackbar( "Smin", "CamShift 1", &smin1, 256, 0 );
 
 
     namedWindow( "CamShift 2", 0 );
     setMouseCallback( "CamShift 2", onMouse2, 0 );
-    createTrackbar( "Vmin", "CamShift 2", &vmin2, 256, 0 );
-    createTrackbar( "Vmax", "CamShift 2", &vmax2, 256, 0 );
-    createTrackbar( "Smin", "CamShift 2", &smin2, 256, 0 );
+    // createTrackbar( "Vmin", "CamShift 2", &vmin2, 256, 0 );
+    // createTrackbar( "Vmax", "CamShift 2", &vmax2, 256, 0 );
+    // createTrackbar( "Smin", "CamShift 2", &smin2, 256, 0 );
+
+    namedWindow("Input 1", 0);
+    namedWindow("Input 2", 0);
 
     Mat frame1, hsv1, hue1, mask1, hist1, histimg1 = Mat::zeros(200, 320, CV_8UC3), backproj1;
     Mat frame2, hsv2, hue2, mask2, hist2, histimg2 = Mat::zeros(200, 320, CV_8UC3), backproj2;
@@ -221,6 +230,8 @@ int main( int argc, const char** argv )
 
         frame1.copyTo(image1);
         frame2.copyTo(image2);
+        frame1.copyTo(imageOriginal1);
+        frame2.copyTo(imageOriginal2);
 
         pMOG1->operator()(image1, fgMaskMOG1);
         fgMaskMOG1.copyTo(channel1[0]);
@@ -243,12 +254,12 @@ int main( int argc, const char** argv )
         merge(channel2, 3, image2);
 
         //morphological opening (removes small objects from the foreground)
-        erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
-        dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
+        erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(8, 8)) );
+        dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(8, 8)) );
 
         //morphological closing (removes small holes from the foreground)
-        dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
-        erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(7, 7)) );
+        dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(8, 8)) );
+        erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(8, 8)) );
 
         if( !paused )
         {
@@ -300,8 +311,8 @@ int main( int argc, const char** argv )
                     trackBox1 = CamShift(backproj1, trackWindow1,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
                 }
-                else{
-                    Rect preWindow1(predictPt1.x, predictPt1.y, 50, 50); 
+                else {
+                    Rect preWindow1(predictPt1.x, predictPt1.y, 10, 10); 
                     trackBox1 = CamShift(backproj1, preWindow1,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
                 }
@@ -316,12 +327,15 @@ int main( int argc, const char** argv )
                 if( backprojMode )
                     cvtColor( backproj1, image1, COLOR_GRAY2BGR );
                 ellipse( image1, trackBox1, Scalar(0,255,0), 3, CV_AA );
+                ellipse( imageOriginal1, trackBox1, Scalar(0,255,0), 3, CV_AA );
 
                 cout << "\nCam 1 Object Pixel Position: \t";
                 cout << trackBox1.center.x << "\t" << trackBox1.center.y;
                 if(trackBox1.center.x != 0 || trackBox1.center.y != 0) {
                     xCam1 = trackBox1.center.x;
                     yCam1 = trackBox1.center.y;
+                    posX1 = trackBox1.center.x;
+                    posY1 = trackBox1.center.y;
 
                     measurement1(0) = xCam1;
                     measurement1(1) = yCam1; 
@@ -336,6 +350,7 @@ int main( int argc, const char** argv )
                 cout << "\nCam 1 Predicted Position: \t";
                 cout << predictPt1.x << "\t" << predictPt1.y;
                 circle(image1 , Point(  predictPt1.x,predictPt1.y), 16.0, Scalar( 0, 155, 255), 3, 8 );
+                circle(imageOriginal1 , Point(  predictPt1.x,predictPt1.y), 16.0, Scalar( 0, 155, 255), 3, 8 );
             }
 
 
@@ -383,8 +398,8 @@ int main( int argc, const char** argv )
                     trackBox2 = CamShift(backproj2, trackWindow2,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
                 }
-                else{
-                    Rect preWindow2(predictPt2.x, predictPt2.y, 50, 50); 
+                else {
+                    Rect preWindow2(predictPt2.x, predictPt2.y, 10, 10); 
                     trackBox2 = CamShift(backproj2, preWindow2,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
                 }
@@ -399,12 +414,16 @@ int main( int argc, const char** argv )
                 if( backprojMode )
                     cvtColor( backproj2, image2, COLOR_GRAY2BGR );
                 ellipse( image2, trackBox2, Scalar(0,255,0), 3, CV_AA );
+                ellipse( imageOriginal2, trackBox2, Scalar(0,255,0), 3, CV_AA );
 
                 cout << "\nCam 2 Object Pixel Position: \t";
-                cout << trackBox2.center.x << "\t" << trackBox2.center.y << "\n";
+                cout << trackBox2.center.x << "\t" << trackBox2.center.y;
                 if(trackBox2.center.x != 0 || trackBox2.center.y != 0) {
                     xCam2 = trackBox2.center.x;
                     yCam2 = trackBox2.center.y;
+                    posX2 = trackBox2.center.x;
+                    posY2 = trackBox2.center.y;
+
 
                     measurement2(0) = xCam2;
                     measurement2(1) = yCam2; 
@@ -419,11 +438,62 @@ int main( int argc, const char** argv )
                 cout << "\nCam 2 Predicted Position: \t";
                 cout << predictPt2.x << "\t" << predictPt2.y;
                 circle(image2 , Point(  predictPt2.x,predictPt2.y), 16.0, Scalar( 0, 155, 255), 3, 8 );
+                circle(imageOriginal2 , Point(  predictPt2.x,predictPt2.y), 16.0, Scalar( 0, 155, 255), 3, 8 );
             }
 
         }
         // else if( trackObject1 < 0 && trackObject2 < 0 )
         //     paused = false;
+
+        //==================== DISTANCE ESTIMATION ========================================================================//
+
+        double dist = 600;
+
+        // convert pixel position to angle
+        double angleX1 = 90 - ((posX1*64) / 640) + 26;
+        double angleX2 = (((posX2*64) / 640) + 26);
+
+        // calculate tangensial value for angles
+        double tan1 = tan( angleX1 * PI / 180.0 );
+        double tan2 = tan( angleX2 * PI / 180.0 );
+
+        // calculate object position
+        int posX, posY;
+        posX = (tan1 * dist) / (tan1 + tan2);
+        posY = (tan2 * posX);
+
+        cout << "\nObject position: \t";
+        
+        cout << posX << "\t";
+        cout << posY << "\t";
+
+        //==================== distance estimation ========================================================================//
+
+        //==================== HEIGHT ESTIMATION ========================================================================//
+        
+        double stand = 103.0;
+        double posR, angleZ, tanZ;
+
+        posR = sqrt(posX*posX + posY*posY);
+
+        if(posY2 > 240) {
+            angleZ = ((posY2*48) / 480) - 24;
+            tanZ = tan(angleZ * PI / 180.0);
+
+            posZ = posR * tanZ;
+            posZ = stand - posZ;
+        }
+        else if (posY2 < 240){
+            angleZ = 24 - ((posY2*48)/480);
+            tanZ = tan(angleZ * PI / 180.0);
+
+            posZ = posR * tanZ;
+            posZ = stand + posZ;
+        }
+        else posZ = stand;
+        cout << posZ << "\n\n";
+        //==================== height estimation ========================================================================//
+
 
         if( selectObject1 && selection1.width > 0 && selection1.height > 0 )
         {
@@ -439,9 +509,10 @@ int main( int argc, const char** argv )
 
         imshow( "CamShift 1", image1 );
         imshow( "CamShift 2", image2 );
+        imshow( "Input 1", imageOriginal1 );
+        imshow( "Input 2", imageOriginal2 );
         imshow( "Histogram 1", histimg1 );
         imshow( "Histogram 2", histimg2 );
-
 
         char c = (char)waitKey(1);
         if( c == 27 )

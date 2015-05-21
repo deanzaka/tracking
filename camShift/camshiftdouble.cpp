@@ -110,6 +110,36 @@ int main( int argc, const char** argv )
 {
     help();
 
+     KalmanFilter KF1(4, 2, 0);
+
+    // intialization of KF
+    KF1.transitionMatrix = *(Mat_<float>(4, 4) << 1,0,1,0,   0,1,0,1,  0,0,1,0,  0,0,0,1);
+    Mat_<float> measurement1(2,1); measurement1.setTo(Scalar(0));
+     
+    KF1.statePre.at<float>(0) = 0; // initial value
+    KF1.statePre.at<float>(1) = 0; // initial value
+    KF1.statePre.at<float>(2) = 0;
+    KF1.statePre.at<float>(3) = 0;
+    setIdentity(KF1.measurementMatrix);
+    setIdentity(KF1.processNoiseCov, Scalar::all(.005));
+    setIdentity(KF1.measurementNoiseCov, Scalar::all(1e-1));
+    setIdentity(KF1.errorCovPost, Scalar::all(.1));
+
+    KalmanFilter KF2(4, 2, 0);
+
+    // intialization of KF
+    KF2.transitionMatrix = *(Mat_<float>(4, 4) << 1,0,1,0,   0,1,0,1,  0,0,1,0,  0,0,0,1);
+    Mat_<float> measurement2(2,1); measurement2.setTo(Scalar(0));
+     
+    KF2.statePre.at<float>(0) = 0; // initial value
+    KF2.statePre.at<float>(1) = 0; // initial value
+    KF2.statePre.at<float>(2) = 0;
+    KF2.statePre.at<float>(3) = 0;
+    setIdentity(KF2.measurementMatrix);
+    setIdentity(KF2.processNoiseCov, Scalar::all(.005));
+    setIdentity(KF2.measurementNoiseCov, Scalar::all(1e-1));
+    setIdentity(KF2.errorCovPost, Scalar::all(.1));
+
     VideoCapture cap1;
     Rect trackWindow1;
     VideoCapture cap2;
@@ -160,6 +190,13 @@ int main( int argc, const char** argv )
 
     for(;;)
     {
+
+        // First predict, to update the internal statePre variable
+        Mat prediction1 = KF1.predict();
+        Point predictPt1(prediction1.at<float>(0),prediction1.at<float>(1));
+        Mat prediction2 = KF2.predict();
+        Point predictPt2(prediction2.at<float>(0),prediction2.at<float>(1));
+
         if( !paused )
         {
             cap1 >> frame1;
@@ -176,33 +213,33 @@ int main( int argc, const char** argv )
         frame1.copyTo(image1);
         frame2.copyTo(image2);
 
-        pMOG1->operator()(image1, fgMaskMOG1);
-        fgMaskMOG1.copyTo(channel1[0]);
-        channel1[1] = Mat::zeros(480, 640, CV_8UC1 );
-        channel1[2] = Mat::zeros(480, 640, CV_8UC1 );
-        merge(channel1, 3, image1);
+        // pMOG1->operator()(image1, fgMaskMOG1);
+        // fgMaskMOG1.copyTo(channel1[0]);
+        // channel1[1] = Mat::zeros(480, 640, CV_8UC1 );
+        // channel1[2] = Mat::zeros(480, 640, CV_8UC1 );
+        // merge(channel1, 3, image1);
 
-        //morphological opening (removes small objects from the foreground)
-        erode(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
-        dilate(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
+        // //morphological opening (removes small objects from the foreground)
+        // erode(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
+        // dilate(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
 
-        //morphological closing (removes small holes from the foreground)
-        dilate(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
-        erode(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
+        // //morphological closing (removes small holes from the foreground)
+        // dilate(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
+        // erode(image1, image1, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
 
-        pMOG2->operator()(image2, fgMaskMOG2);
-        fgMaskMOG2.copyTo(channel2[2]);
-        channel2[1] = Mat::zeros(480, 640, CV_8UC1 );
-        channel2[0] = Mat::zeros(480, 640, CV_8UC1 );
-        merge(channel2, 3, image2);
+        // pMOG2->operator()(image2, fgMaskMOG2);
+        // fgMaskMOG2.copyTo(channel2[2]);
+        // channel2[1] = Mat::zeros(480, 640, CV_8UC1 );
+        // channel2[0] = Mat::zeros(480, 640, CV_8UC1 );
+        // merge(channel2, 3, image2);
 
-        //morphological opening (removes small objects from the foreground)
-        erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
-        dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
+        // //morphological opening (removes small objects from the foreground)
+        // erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
+        // dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
 
-        //morphological closing (removes small holes from the foreground)
-        dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
-        erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
+        // //morphological closing (removes small holes from the foreground)
+        // dilate(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
+        // erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
 
         if( !paused )
         {
@@ -253,6 +290,11 @@ int main( int argc, const char** argv )
                     trackBox1 = CamShift(backproj1, trackWindow1,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
                 }
+                else{
+                    Rect preWindow1(predictPt1.x, predictPt1.y, 50, 50); 
+                    trackBox1 = CamShift(backproj1, preWindow1,
+                                        TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
+                }
                 if( trackWindow1.area() <= 1 )
                 {
                     int cols = backproj1.cols, rows = backproj1.rows, r = (MIN(cols, rows) + 5)/6;
@@ -266,8 +308,25 @@ int main( int argc, const char** argv )
                 if(trackBox1.size.width != 0 && trackBox1.size.height != 0 )
                     ellipse( image1, trackBox1, Scalar(0,255,0), 3, CV_AA );
                 
-                cout << "\nCam 1 XY Position: \t";
+                cout << "\nCam 1 XY Position: \t\t";
                 cout << trackBox1.center.x << "\t" << trackBox1.center.y;
+                if(trackBox1.center.x != 0 || trackBox1.center.y != 0) {
+                    xCam1 = trackBox1.center.x;
+                    yCam1 = trackBox1.center.y;
+
+                    measurement1(0) = xCam1;
+                    measurement1(1) = yCam1; 
+
+                    // The update phase 
+                    Mat estimated1 = KF1.correct(measurement1);
+                    Point statePt1(estimated1.at<float>(0),estimated1.at<float>(1));
+                }
+
+                prediction1 = KF1.predict();
+                Point predictPt1(prediction1.at<float>(0),prediction1.at<float>(1));
+                cout << "\nCam 1 Predicted Position: \t";
+                cout << predictPt1.x << "\t" << predictPt1.y;
+                circle(image1 , Point(  predictPt1.x,predictPt1.y), 16.0, Scalar( 0, 155, 255), 3, 8 );
 
             }
 
@@ -316,6 +375,11 @@ int main( int argc, const char** argv )
                     trackBox2 = CamShift(backproj2, trackWindow2,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
                 }
+                else{
+                    Rect preWindow2(predictPt2.x, predictPt2.y, 50, 50); 
+                    trackBox2 = CamShift(backproj2, preWindow2,
+                                        TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
+                }
                 if( trackWindow2.area() <= 1 )
                 {
                     int cols = backproj2.cols, rows = backproj2.rows, r = (MIN(cols, rows) + 5)/6;
@@ -329,15 +393,32 @@ int main( int argc, const char** argv )
                 if(trackBox2.size.width != 0 && trackBox2.size.height != 0 )
                     ellipse( image2, trackBox2, Scalar(0,255,0), 3, CV_AA );
                 
-                cout << "\nCam 2 XY Position: \t";
-                cout << trackBox2.center.x << "\t" << trackBox2.center.y << "\n";
+                cout << "\nCam 2 XY Position: \t\t";
+                cout << trackBox2.center.x << "\t" << trackBox2.center.y;
+                if(trackBox2.center.x != 0 || trackBox2.center.y != 0) {
+                    xCam2 = trackBox2.center.x;
+                    yCam2 = trackBox2.center.y;
+
+                    measurement2(0) = xCam2;
+                    measurement2(1) = yCam2; 
+
+                    // The update phase 
+                    Mat estimated2 = KF2.correct(measurement2);
+                    Point statePt2(estimated2.at<float>(0),estimated2.at<float>(1));
+                }
+
+                prediction2 = KF2.predict();
+                Point predictPt2(prediction2.at<float>(0),prediction2.at<float>(1));
+                cout << "\nCam 2 Predicted Position: \t";
+                cout << predictPt2.x << "\t" << predictPt2.y << "\n";
+                circle(image2 , Point(  predictPt2.x,predictPt2.y), 16.0, Scalar( 0, 155, 255), 3, 8 );
 
             }
 
 
         }
-        else if( trackObject1 < 0 && trackObject2 < 0 )
-            paused = false;
+        //else if( trackObject1 < 0 && trackObject2 < 0 )
+        //   paused = false;
 
         if( selectObject1 && selection1.width > 0 && selection1.height > 0 )
         {
