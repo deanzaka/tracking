@@ -144,14 +144,14 @@ int main( int argc, const char** argv )
     setIdentity(KF2.measurementNoiseCov, Scalar::all(1e-1));
     setIdentity(KF2.errorCovPost, Scalar::all(.1));
 
-    VideoCapture inputVideo1("../input/video2_mpeg4.avi");              // Open input
+    VideoCapture inputVideo1("../input/video2_withnet.avi");              // Open input
     if (!inputVideo1.isOpened())
     {
         cout  << "Could not open the input video 1" << endl;
         return -1;
     }
 
-    VideoCapture inputVideo2("../input/video1_mpeg4.avi");              // Open input
+    VideoCapture inputVideo2("../input/video1_withnet.avi");              // Open input
     if (!inputVideo2.isOpened())
     {
         cout  << "Could not open the input video 2" << endl;
@@ -311,7 +311,7 @@ int main( int argc, const char** argv )
                     trackBox1 = CamShift(backproj1, trackWindow1,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
                 }
-                else if(posZ > 5){
+                else if(predictPt1.y < 480){
                     Rect preWindow1(predictPt1.x, predictPt1.y, 10, 10); 
                     trackBox1 = CamShift(backproj1, preWindow1,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
@@ -404,7 +404,7 @@ int main( int argc, const char** argv )
                     trackBox2 = CamShift(backproj2, trackWindow2,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
                 }
-                else if (posZ > 5) {
+                else if (predictPt2.y < 480) {
                     Rect preWindow2(predictPt2.x, predictPt2.y, 10, 10); 
                     trackBox2 = CamShift(backproj2, preWindow2,
                                         TermCriteria( CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 10, 1 ));
@@ -462,7 +462,7 @@ int main( int argc, const char** argv )
         double dist = 600;
 
         // convert pixel position to angle
-        double angleX1 = 90 - ((posX1*64) / 640) + 26;
+        double angleX1 = 90 - ((posX1*64) / 640);
         double angleX2 = (((posX2*64) / 640) + 26);
 
         // calculate tangensial value for angles
@@ -483,7 +483,7 @@ int main( int argc, const char** argv )
 
         //==================== HEIGHT ESTIMATION ========================================================================//
         
-        double stand = 103.0;
+        double stand = 120.0;
         double posR, angleZ, tanZ;
 
         posR = sqrt(posX*posX + posY*posY);
