@@ -110,7 +110,7 @@ int main( int argc, const char** argv )
 {
     help();
 
-     KalmanFilter KF1(4, 2, 0);
+    KalmanFilter KF1(4, 2, 0);
 
     // intialization of KF
     KF1.transitionMatrix = *(Mat_<float>(4, 4) << 1,0,1,0,   0,1,0,1,  0,0,1,0,  0,0,0,1);
@@ -242,7 +242,7 @@ int main( int argc, const char** argv )
         // erode(image2, image2, getStructuringElement(MORPH_ELLIPSE, Size(10, 10)) );
 
         if( !paused )
-        {
+        {   
             cvtColor(image1, hsv1, COLOR_BGR2HSV);
             cvtColor(image2, hsv2, COLOR_BGR2HSV);
             
@@ -449,13 +449,19 @@ int main( int argc, const char** argv )
         case 'c':
             trackObject1 = 0;
             histimg1 = Scalar::all(0);
+            trackObject2 = 0;
+            histimg2 = Scalar::all(0);
             break;
         case 'h':
             showHist = !showHist;
-            if( !showHist )
-                destroyWindow( "Histogram" );
-            else
-                namedWindow( "Histogram", 1 );
+            if( !showHist ) {
+                destroyWindow( "Histogram 1" );
+                destroyWindow( "Histogram 2" );
+            }
+            else {
+                namedWindow( "Histogram 1", 1 );
+                namedWindow( "Histogram 2", 1 );
+            }
             break;
         case 'p':
             paused = !paused;

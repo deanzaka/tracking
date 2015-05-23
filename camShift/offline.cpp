@@ -537,6 +537,8 @@ int main( int argc, const char** argv )
         case 'c':
             trackObject1 = 0;
             histimg1 = Scalar::all(0);
+            trackObject2 = 0;
+            histimg2 = Scalar::all(0);
             break;
         case 'h':
             showHist = !showHist;
