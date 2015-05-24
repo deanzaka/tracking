@@ -457,53 +457,56 @@ int main( int argc, const char** argv )
         // else if( trackObject1 < 0 && trackObject2 < 0 )
         //     paused = false;
 
-        //==================== DISTANCE ESTIMATION ========================================================================//
+         //==================== DISTANCE ESTIMATION ========================================================================//
 
-        double dist = 600;
+        if( trackObject1 > 0 && trackObject2 > 0) {
+           
+            double dist = 600;
 
-        // convert pixel position to angle
-        double angleX1 = 90 - ((posX1*64) / 640);
-        double angleX2 = (((posX2*64) / 640) + 26);
+            // convert pixel position to angle
+            double angleX1 = 90 - ((posX1*64) / 640);
+            double angleX2 = (((posX2*64) / 640) + 26);
 
-        // calculate tangensial value for angles
-        double tan1 = tan( angleX1 * PI / 180.0 );
-        double tan2 = tan( angleX2 * PI / 180.0 );
+            // calculate tangensial value for angles
+            double tan1 = tan( angleX1 * PI / 180.0 );
+            double tan2 = tan( angleX2 * PI / 180.0 );
 
-        // calculate object position
-        int posX, posY;
-        posX = (tan1 * dist) / (tan1 + tan2);
-        posY = (tan2 * posX);
+            // calculate object position
+            int posX, posY;
+            posX = (tan1 * dist) / (tan1 + tan2);
+            posY = (tan2 * posX);
 
-        cout << "\nObject position: \t";
-        
-        cout << posX << "\t";
-        cout << posY << "\t";
+            cout << "\nObject position: \t";
+            
+            cout << posX << "\t";
+            cout << posY << "\t";
 
         //==================== distance estimation ========================================================================//
 
         //==================== HEIGHT ESTIMATION ========================================================================//
-        
-        double stand = 120.0;
-        double posR, angleZ, tanZ;
+            
+            double stand = 120.0;
+            double posR, angleZ, tanZ;
 
-        posR = sqrt(posX*posX + posY*posY);
+            posR = sqrt(posX*posX + posY*posY);
 
-        if(posY2 > 240) {
-            angleZ = ((posY2*48) / 480) - 24;
-            tanZ = tan(angleZ * PI / 180.0);
+            if(posY2 > 240) {
+                angleZ = ((posY2*48) / 480) - 24;
+                tanZ = tan(angleZ * PI / 180.0);
 
-            posZ = posR * tanZ;
-            posZ = stand - posZ;
+                posZ = posR * tanZ;
+                posZ = stand - posZ;
+            }
+            else if (posY2 < 240){
+                angleZ = 24 - ((posY2*48)/480);
+                tanZ = tan(angleZ * PI / 180.0);
+
+                posZ = posR * tanZ;
+                posZ = stand + posZ;
+            }
+            else posZ = stand;
+            cout << posZ << "\n\n";
         }
-        else if (posY2 < 240){
-            angleZ = 24 - ((posY2*48)/480);
-            tanZ = tan(angleZ * PI / 180.0);
-
-            posZ = posR * tanZ;
-            posZ = stand + posZ;
-        }
-        else posZ = stand;
-        cout << posZ << "\n\n";
         //==================== height estimation ========================================================================//
 
 
