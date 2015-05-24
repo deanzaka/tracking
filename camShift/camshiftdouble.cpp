@@ -11,7 +11,7 @@
 using namespace cv;
 using namespace std;
 
-Mat image1, image2;
+Mat image1, image2, imageOriginal1, imageOriginal2;
 
 bool showHist = true;
 bool backprojMode = false;
@@ -169,16 +169,19 @@ int main( int argc, const char** argv )
 
     namedWindow( "CamShift 1", 0 );
     setMouseCallback( "CamShift 1", onMouse1, 0 );
-    createTrackbar( "Vmin", "CamShift 1", &vmin1, 256, 0 );
-    createTrackbar( "Vmax", "CamShift 1", &vmax1, 256, 0 );
-    createTrackbar( "Smin", "CamShift 1", &smin1, 256, 0 );
+    // createTrackbar( "Vmin", "CamShift 1", &vmin1, 256, 0 );
+    // createTrackbar( "Vmax", "CamShift 1", &vmax1, 256, 0 );
+    // createTrackbar( "Smin", "CamShift 1", &smin1, 256, 0 );
 
 
     namedWindow( "CamShift 2", 0 );
     setMouseCallback( "CamShift 2", onMouse2, 0 );
-    createTrackbar( "Vmin", "CamShift 2", &vmin2, 256, 0 );
-    createTrackbar( "Vmax", "CamShift 2", &vmax2, 256, 0 );
-    createTrackbar( "Smin", "CamShift 2", &smin2, 256, 0 );
+    // createTrackbar( "Vmin", "CamShift 2", &vmin2, 256, 0 );
+    // createTrackbar( "Vmax", "CamShift 2", &vmax2, 256, 0 );
+    // createTrackbar( "Smin", "CamShift 2", &smin2, 256, 0 );
+
+    namedWindow("Input 1", 0);
+    namedWindow("Input 2", 0);
 
     Mat frame1, hsv1, hue1, mask1, hist1, histimg1 = Mat::zeros(200, 320, CV_8UC3), backproj1;
     Mat frame2, hsv2, hue2, mask2, hist2, histimg2 = Mat::zeros(200, 320, CV_8UC3), backproj2;
@@ -212,6 +215,8 @@ int main( int argc, const char** argv )
 
         frame1.copyTo(image1);
         frame2.copyTo(image2);
+        frame1.copyTo(imageOriginal1);
+        frame2.copyTo(imageOriginal2);
 
         // pMOG1->operator()(image1, fgMaskMOG1);
         // fgMaskMOG1.copyTo(channel1[0]);
@@ -434,6 +439,8 @@ int main( int argc, const char** argv )
 
         imshow( "CamShift 1", image1 );
         imshow( "CamShift 2", image2 );
+        imshow( "Input 1", imageOriginal1 );
+        imshow( "Input 2", imageOriginal2 );
         imshow( "Histogram 1", histimg1 );
         imshow( "Histogram 2", histimg2 );
 
