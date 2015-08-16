@@ -64,7 +64,7 @@ void sortCorners(vector<Point2f>& corners, Point2f center)
 
 int main( int argc, char** argv )
 {
-    VideoCapture cap(1); //capture the video from webcam
+    VideoCapture cap(0); //capture the video from webcam
 
     if ( !cap.isOpened() )  // if not success, exit program
     {
