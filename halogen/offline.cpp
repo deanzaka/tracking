@@ -41,6 +41,8 @@ int main( int argc, char** argv )
     int iLowV = 230;
     int iHighV = 255;
     
+    int noise = 0;
+    int holes = 10;
 
     //Create trackbars in "Object" window
     createTrackbar("LowH", "Object", &iLowH, 179); //Hue (0 - 179)
@@ -51,6 +53,9 @@ int main( int argc, char** argv )
 
     createTrackbar("LowV", "Object", &iLowV, 255);//Value (0 - 255)
     createTrackbar("HighV", "Object", &iHighV, 255);
+
+    createTrackbar("removes small noise", "Object", &noise, 10);
+    createTrackbar("removes small holes", "Object", &holes, 10);
 
     VideoCapture inputVideo("../../../Videos/AUAVUI2015/cut/cut1.avi"); //capture the video from webcam
     
@@ -79,6 +84,28 @@ int main( int argc, char** argv )
         Mat imgThresholded;
         inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
         
+        //morphological opening (removes small objects from the foreground)
+        erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(noise+1, noise+1)) );
+        dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(noise+1, noise+1)) );
+
+        //morphological closing (removes small holes from the foreground)
+        dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(holes+1, holes+1)) );
+        erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(holes+1, holes+1)) );
+
+        // Set up the detector with default parameters.
+        SimpleBlobDetector detector;
+
+        // Detect blobs.
+        vector<KeyPoint> keypoints;
+        detector.detect( im, keypoints);
+         
+        // Draw detected blobs as red circles.
+        // DrawMatchesFlags::DRAW_RICH_KEYPOINTS flag ensures the size of the circle corresponds to the size of blob
+        Mat imgDetection;
+        drawKeypoints( imgThresholded, keypoints, imgDetection, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+        drawKeypoints( imgThresholded, keypoints, imgThresholded, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+        drawKeypoints( imgOriginal, keypoints, imgOriginal, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+
         imshow("Original", imgOriginal); //show the original image
         imshow("Thresholded", imgThresholded); //show Thresholded image
 
