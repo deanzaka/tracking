@@ -92,23 +92,32 @@ int main( int argc, char** argv )
         dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(holes+1, holes+1)) );
         erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(holes+1, holes+1)) );
 
-        // Set up the detector with default parameters.
-        SimpleBlobDetector detector;
+        Moments oMoments = moments(imgThresholded);
 
-        // Detect blobs.
-        vector<KeyPoint> keypoints;
-        detector.detect( im, keypoints);
-         
-        // Draw detected blobs as red circles.
-        // DrawMatchesFlags::DRAW_RICH_KEYPOINTS flag ensures the size of the circle corresponds to the size of blob
-        Mat imgDetection;
-        drawKeypoints( imgThresholded, keypoints, imgDetection, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-        drawKeypoints( imgThresholded, keypoints, imgThresholded, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
-        drawKeypoints( imgOriginal, keypoints, imgOriginal, Scalar(0,0,255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS );
+        double dM01 = oMoments.m01;
+        double dM10 = oMoments.m10;
+        double dArea = oMoments.m00;
+        int posX, posY;
+
+        // if the area <= 10000, I consider that the there are no object in the image
+        //and it's because of the noise, the area is not zero
+        if (dArea > 10000)
+        {
+            //calculate the position of the ball
+            posX = dM10 / dArea;
+            posY = dM01 / dArea;
+
+            // Draw a circle
+            circle( imgOriginal, Point(posX,posY), 16.0, Scalar( 0, 0, 255), 3, 8 );
+
+            cout << "Object position: \t";
+            cout << posX << "\t";
+            cout << posY << "\n";
+        }
 
         imshow("Original", imgOriginal); //show the original image
         imshow("Thresholded", imgThresholded); //show Thresholded image
-
+        
         char c = (char)waitKey(30); //wait for key press for 30ms
 
         if (c == 27) // ascii of esc
