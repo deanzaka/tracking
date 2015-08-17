@@ -32,13 +32,13 @@ int main( int argc, char** argv )
 
     namedWindow("Object", CV_WINDOW_AUTOSIZE);
 
-    int iLowH = 0;
-    int iHighH = 10;
+    int iLowH = 125;
+    int iHighH = 170;
 
-    int iLowS = 150;
-    int iHighS = 255;
+    int iLowS = 2;
+    int iHighS = 20;
 
-    int iLowV = 110;
+    int iLowV = 230;
     int iHighV = 255;
     
 
@@ -72,10 +72,15 @@ int main( int argc, char** argv )
         }
         
         frame.copyTo(imgOriginal);
-        Mat imgHSV1;
+        
+        Mat imgHSV;
         cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
 
+        Mat imgThresholded;
+        inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
+        
         imshow("Original", imgOriginal); //show the original image
+        imshow("Thresholded", imgThresholded); //show Thresholded image
 
         char c = (char)waitKey(30); //wait for key press for 30ms
 
