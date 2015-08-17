@@ -28,6 +28,8 @@ using namespace std;
 int main( int argc, char** argv )
 {
     VideoCapture inputVideo("../../../Videos/AUAVUI2015/cut/cut1.avi"); //capture the video from webcam
+    bool paused = false;
+    Mat frame, imgOriginal;
 
     if ( !inputVideo.isOpened() )  // if not success, exit program
     {
@@ -37,22 +39,32 @@ int main( int argc, char** argv )
     
     while (true)
     {
-        Mat imgOriginal;
-        bool bSuccess = inputVideo.read(imgOriginal); // read a new frame from video
-        
-        if (!bSuccess) //if not success, break loop
-        {
-            cout << "Cannot read a frame from video file" << endl;
-            break;
+        if (!paused) {
+            // bSuccess = inputVideo.read(imgOriginal); // read a new frame from video
+            inputVideo >> frame;
+            if( frame.empty() ) {
+                break;
+            }
         }
+        //else bSuccess = false; 
 
+        // if (!bSuccess) //if not success, break loop
+        // {
+        //     cout << "Cannot read a frame from video file" << endl;
+        //     break;
+        // }
+
+        frame.copyTo(imgOriginal);
         imshow("Original", imgOriginal); //show the original image
 
-        if (waitKey(30) == 27) //wait for 'esc' key press for 30ms. If 'esc' key is pressed, break loop
+        char c = (char)waitKey(30); //wait for key press for 30ms
+
+        if (c == 27) // ascii of esc
         {
-        cout << "esc key is pressed by user" << endl;
-                break;
+            cout << "esc key is pressed by user" << endl;
+            break;
         }
+        else if (c == 'p') paused = !paused;
     }
     return 0;
 }
