@@ -43,17 +43,11 @@ int main( int argc, char** argv )
             // bSuccess = inputVideo.read(imgOriginal); // read a new frame from video
             inputVideo >> frame;
             if( frame.empty() ) {
+                cout << "No frame" << endl;   
                 break;
             }
         }
-        //else bSuccess = false; 
-
-        // if (!bSuccess) //if not success, break loop
-        // {
-        //     cout << "Cannot read a frame from video file" << endl;
-        //     break;
-        // }
-
+        
         frame.copyTo(imgOriginal);
         imshow("Original", imgOriginal); //show the original image
 
