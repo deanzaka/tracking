@@ -27,22 +27,22 @@ using namespace std;
 
 int main( int argc, char** argv )
 {
-    VideoCapture cap(1); //capture the video from webcam
+    VideoCapture inputVideo("../../../Videos/AUAVUI2015/Halogen/GRD-030815-0825.avi"); //capture the video from webcam
 
-    if ( !cap.isOpened() )  // if not success, exit program
+    if ( !inputVideo.isOpened() )  // if not success, exit program
     {
-        cout << "Cannot open the web cam" << endl;
+        cout << "Cannot open file" << endl;
         return -1;
     }
     
     while (true)
     {
         Mat imgOriginal;
-        bool bSuccess = cap.read(imgOriginal); // read a new frame from video
+        bool bSuccess = inputVideo.read(imgOriginal); // read a new frame from video
         
         if (!bSuccess) //if not success, break loop
         {
-            cout << "Cannot read a frame from video stream" << endl;
+            cout << "Cannot read a frame from video file" << endl;
             break;
         }
 
