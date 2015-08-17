@@ -27,10 +27,33 @@ using namespace std;
 
 int main( int argc, char** argv )
 {
-    VideoCapture inputVideo("../../../Videos/AUAVUI2015/cut/cut1.avi"); //capture the video from webcam
     bool paused = false;
-    Mat frame, imgOriginal;
+    Mat frame, imgOriginal, imgHSV;
 
+    namedWindow("Object", CV_WINDOW_AUTOSIZE);
+
+    int iLowH = 0;
+    int iHighH = 10;
+
+    int iLowS = 150;
+    int iHighS = 255;
+
+    int iLowV = 110;
+    int iHighV = 255;
+    
+
+    //Create trackbars in "Object" window
+    createTrackbar("LowH", "Object", &iLowH, 179); //Hue (0 - 179)
+    createTrackbar("HighH", "Object", &iHighH, 179);
+
+    createTrackbar("LowS", "Object", &iLowS, 255); //Saturation (0 - 255)
+    createTrackbar("HighS", "Object", &iHighS, 255);
+
+    createTrackbar("LowV", "Object", &iLowV, 255);//Value (0 - 255)
+    createTrackbar("HighV", "Object", &iHighV, 255);
+
+    VideoCapture inputVideo("../../../Videos/AUAVUI2015/cut/cut1.avi"); //capture the video from webcam
+    
     if ( !inputVideo.isOpened() )  // if not success, exit program
     {
         cout << "Cannot open file" << endl;
@@ -49,6 +72,9 @@ int main( int argc, char** argv )
         }
         
         frame.copyTo(imgOriginal);
+        Mat imgHSV1;
+        cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+
         imshow("Original", imgOriginal); //show the original image
 
         char c = (char)waitKey(30); //wait for key press for 30ms
