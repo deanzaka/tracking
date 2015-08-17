@@ -27,7 +27,7 @@ using namespace std;
 
 int main( int argc, char** argv )
 {
-    VideoCapture inputVideo("../../../Videos/AUAVUI2015/Halogen/GRD-030815-0825.avi"); //capture the video from webcam
+    VideoCapture inputVideo("../../../Videos/AUAVUI2015/cut/cut1.avi"); //capture the video from webcam
 
     if ( !inputVideo.isOpened() )  // if not success, exit program
     {
