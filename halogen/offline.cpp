@@ -57,7 +57,7 @@ int main( int argc, char** argv )
     createTrackbar("removes small noise", "Object", &noise, 10);
     createTrackbar("removes small holes", "Object", &holes, 10);
 
-    VideoCapture inputVideo("../../../Videos/AUAVUI2015/cut/cut1.avi"); //capture the video from webcam
+    VideoCapture inputVideo("../../../Videos/AUAVUI2015/cut/GRD-030815-0825-CUT.avi"); //capture the video from webcam
     
     if ( !inputVideo.isOpened() )  // if not success, exit program
     {
@@ -78,19 +78,29 @@ int main( int argc, char** argv )
         
         frame.copyTo(imgOriginal);
         
-        Mat imgHSV;
-        cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+        // Mat imgHSV;
+        // cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+
+        // Mat imgThresholded;
+        // inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
+        
+        Mat imgGRAY;
+        cvtColor(imgOriginal, imgGRAY, COLOR_BGR2GRAY);
 
         Mat imgThresholded;
-        inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
-        
-        //morphological opening (removes small objects from the foreground)
-        erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(noise+1, noise+1)) );
-        dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(noise+1, noise+1)) );
+        inRange(imgGRAY, iLowV, iHighV, imgThresholded);
 
-        //morphological closing (removes small holes from the foreground)
-        dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(holes+1, holes+1)) );
-        erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(holes+1, holes+1)) );
+        if(noise > 0) {
+            //morphological opening (removes small objects from the foreground)
+            erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(noise, noise)) );
+            dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(noise, noise)) );
+        }
+
+        if(holes > 0) {
+            //morphological closing (removes small holes from the foreground)
+            dilate(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(holes, holes)) );
+            erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(holes, holes)) );
+        }
 
         Moments oMoments = moments(imgThresholded);
 
@@ -99,22 +109,26 @@ int main( int argc, char** argv )
         double dArea = oMoments.m00;
         int posX, posY;
 
+        cout << "Area: " << dArea << endl;
+
         // if the area <= 10000, I consider that the there are no object in the image
         //and it's because of the noise, the area is not zero
-        if (dArea > 10000)
+        if (dArea > 10000 && dArea < 500000)
         {
             //calculate the position of the ball
             posX = dM10 / dArea;
             posY = dM01 / dArea;
 
             // Draw a circle
-            circle( imgOriginal, Point(posX,posY), 16.0, Scalar( 0, 0, 255), 3, 8 );
+            circle( imgGRAY, Point(posX,posY), 16.0, Scalar( 0, 0, 255), 3, 8 );
 
             cout << "Object position: \t";
             cout << posX << "\t";
             cout << posY << "\n";
         }
 
+
+        imshow("Gray", imgGRAY); //show GRAY image
         imshow("Original", imgOriginal); //show the original image
         imshow("Thresholded", imgThresholded); //show Thresholded image
         
