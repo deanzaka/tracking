@@ -32,32 +32,20 @@ int main( int argc, char** argv )
 
     namedWindow("Object", CV_WINDOW_AUTOSIZE);
 
-    int iLowH = 125;
-    int iHighH = 170;
-
-    int iLowS = 2;
-    int iHighS = 20;
-
-    int iLowV = 230;
-    int iHighV = 255;
+    int Low = 230;
+    int High = 255;
     
     int noise = 0;
     int holes = 10;
 
     //Create trackbars in "Object" window
-    createTrackbar("LowH", "Object", &iLowH, 179); //Hue (0 - 179)
-    createTrackbar("HighH", "Object", &iHighH, 179);
-
-    createTrackbar("LowS", "Object", &iLowS, 255); //Saturation (0 - 255)
-    createTrackbar("HighS", "Object", &iHighS, 255);
-
-    createTrackbar("LowV", "Object", &iLowV, 255);//Value (0 - 255)
-    createTrackbar("HighV", "Object", &iHighV, 255);
+    createTrackbar("Low", "Object", &Low, 255);//Value (0 - 255)
+    createTrackbar("High", "Object", &High, 255);
 
     createTrackbar("removes small noise", "Object", &noise, 10);
     createTrackbar("removes small holes", "Object", &holes, 10);
 
-    VideoCapture inputVideo("../../../Videos/AUAVUI2015/cut/GRD-030815-0825-CUT.avi"); //capture the video from webcam
+    VideoCapture inputVideo("../../../Videos/AUAVUI2015/cut/GRD-16085-1545-CUT.avi"); //capture the video from webcam
     
     if ( !inputVideo.isOpened() )  // if not success, exit program
     {
@@ -68,6 +56,7 @@ int main( int argc, char** argv )
     while (true)
     {
         if (!paused) {
+            // bSuccess = inputVideo.read(imgOriginal); // read a new frame from video
             inputVideo >> frame;
             if( frame.empty() ) {
                 cout << "No frame" << endl;   
@@ -77,11 +66,11 @@ int main( int argc, char** argv )
         
         frame.copyTo(imgOriginal);
         
-        Mat imgHSV;
-        cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+        Mat imgGRAY;
+        cvtColor(imgOriginal, imgGRAY, COLOR_BGR2GRAY);
 
         Mat imgThresholded;
-        inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
+        inRange(imgGRAY, Low, High, imgThresholded);
 
         if(noise > 0) {
             //morphological opening (removes small objects from the foreground)
@@ -95,6 +84,22 @@ int main( int argc, char** argv )
             erode(imgThresholded, imgThresholded, getStructuringElement(MORPH_ELLIPSE, Size(holes, holes)) );
         }
 
+        int max = 0;
+        for( int y = 0; y < imgThresholded.rows; y++ ) {
+            for( int x = 0; x < imgThresholded.cols; x++ ) {
+                if ( imgThresholded.at<uchar>(y,x) == 255 ) {
+                    int gray = imgGRAY.at<uchar>(y,x);
+                    if (max < gray) {
+                        max = gray;
+                        cout << "Max = " << max << endl;
+                    }
+                }
+            }
+        }
+        // if(max-5 > Low) {
+        //     inRange(imgGRAY, max-5, High, imgThresholded);
+        // }
+        
         Moments oMoments = moments(imgThresholded);
 
         double dM01 = oMoments.m01;
@@ -111,13 +116,15 @@ int main( int argc, char** argv )
             posY = dM01 / dArea;
 
             // Draw a circle
-            circle( imgHSV, Point(posX,posY), 16.0, Scalar( 0, 0, 255), 3, 8 );
+            circle( imgGRAY, Point(posX,posY), 16.0, Scalar( 0, 0, 255), 3, 8 );
 
             cout << "Object position: \t";
             cout << posX << "\t";
             cout << posY << "\n";
         }
-
+        
+        
+        imshow("Gray", imgGRAY); //show GRAY image
         imshow("Original", imgOriginal); //show the original image
         imshow("Thresholded", imgThresholded); //show Thresholded image
         
