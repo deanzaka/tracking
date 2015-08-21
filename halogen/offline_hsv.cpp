@@ -68,7 +68,6 @@ int main( int argc, char** argv )
     while (true)
     {
         if (!paused) {
-            // bSuccess = inputVideo.read(imgOriginal); // read a new frame from video
             inputVideo >> frame;
             if( frame.empty() ) {
                 cout << "No frame" << endl;   
@@ -78,17 +77,11 @@ int main( int argc, char** argv )
         
         frame.copyTo(imgOriginal);
         
-        // Mat imgHSV;
-        // cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
-
-        // Mat imgThresholded;
-        // inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
-        
-        Mat imgGRAY;
-        cvtColor(imgOriginal, imgGRAY, COLOR_BGR2GRAY);
+        Mat imgHSV;
+        cvtColor(imgOriginal, imgHSV, COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
 
         Mat imgThresholded;
-        inRange(imgGRAY, iLowV, iHighV, imgThresholded);
+        inRange(imgHSV, Scalar(iLowH, iLowS, iLowV), Scalar(iHighH, iHighS, iHighV), imgThresholded); //Threshold the image
 
         if(noise > 0) {
             //morphological opening (removes small objects from the foreground)
@@ -113,22 +106,20 @@ int main( int argc, char** argv )
 
         // if the area <= 10000, I consider that the there are no object in the image
         //and it's because of the noise, the area is not zero
-        if (dArea > 10000 && dArea < 500000)
+        if (dArea > 10000)
         {
             //calculate the position of the ball
             posX = dM10 / dArea;
             posY = dM01 / dArea;
 
             // Draw a circle
-            circle( imgGRAY, Point(posX,posY), 16.0, Scalar( 0, 0, 255), 3, 8 );
+            circle( imgHSV, Point(posX,posY), 16.0, Scalar( 0, 0, 255), 3, 8 );
 
             cout << "Object position: \t";
             cout << posX << "\t";
             cout << posY << "\n";
         }
 
-
-        imshow("Gray", imgGRAY); //show GRAY image
         imshow("Original", imgOriginal); //show the original image
         imshow("Thresholded", imgThresholded); //show Thresholded image
         
