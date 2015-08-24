@@ -32,20 +32,24 @@ int main( int argc, char** argv )
 
     namedWindow("Object", CV_WINDOW_AUTOSIZE);
 
-    int Low = 230;
-    int High = 255;
+    int low = 225;
+    int high = 255;
     
     int noise = 0;
-    int holes = 10;
+    int holes = 20;
+
+    int offset = 20;
 
     //Create trackbars in "Object" window
-    createTrackbar("Low", "Object", &Low, 255);//Value (0 - 255)
-    createTrackbar("High", "Object", &High, 255);
+    createTrackbar("Low", "Object", &low, 255);//Value (0 - 255)
+    createTrackbar("High", "Object", &high, 255);
 
-    createTrackbar("removes small noise", "Object", &noise, 10);
-    createTrackbar("removes small holes", "Object", &holes, 10);
+    createTrackbar("removes small noise", "Object", &noise, 20);
+    createTrackbar("removes small holes", "Object", &holes, 20);
 
-    VideoCapture inputVideo("../../../Videos/AUAVUI2015/cut/GRD-16085-1545-CUT.avi"); //capture the video from webcam
+    createTrackbar("offset from max", "Object", &offset, 20);
+
+    VideoCapture inputVideo("../../../Videos/AUAVUI2015/MyVideo.avi"); //capture the video from webcam
     
     if ( !inputVideo.isOpened() )  // if not success, exit program
     {
@@ -70,7 +74,7 @@ int main( int argc, char** argv )
         cvtColor(imgOriginal, imgGRAY, COLOR_BGR2GRAY);
 
         Mat imgThresholded;
-        inRange(imgGRAY, Low, High, imgThresholded);
+        inRange(imgGRAY, low, high, imgThresholded);
 
         if(noise > 0) {
             //morphological opening (removes small objects from the foreground)
@@ -96,9 +100,10 @@ int main( int argc, char** argv )
                 }
             }
         }
-        // if(max-5 > Low) {
-        //     inRange(imgGRAY, max-5, High, imgThresholded);
-        // }
+        
+        if(max-offset > low) {
+            inRange(imgGRAY, max-offset, high, imgThresholded);
+        }
         
         Moments oMoments = moments(imgThresholded);
 
@@ -122,7 +127,6 @@ int main( int argc, char** argv )
             cout << posX << "\t";
             cout << posY << "\n";
         }
-        
         
         imshow("Gray", imgGRAY); //show GRAY image
         imshow("Original", imgOriginal); //show the original image
